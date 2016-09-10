@@ -37,7 +37,7 @@ module PProf
       Dir[PROV_PROFILES_DIR + '/*.mobileprovision'].each do |file|
         p = PProf::ProvisioningProfile.new(file)
         
-        next unless match_block.call(p)
+        next unless match_block.nil? || match_block.call(p)
 
         state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
         table.print_row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
