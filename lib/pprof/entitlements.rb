@@ -39,6 +39,7 @@ module PProf
       @dict['beta-reports-active']
     end
 
+    # @return [Bool]
     def healthkit
       @dict['com.apple.developer.healthkit']
     end

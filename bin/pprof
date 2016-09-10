@@ -2,12 +2,6 @@
 
 require 'pprof'
 require 'optparse'
-require File.expand_path('cli/ascii_table', File.dirname(__FILE__))
-require File.expand_path('cli/info', File.dirname(__FILE__))
-require File.expand_path('cli/list', File.dirname(__FILE__))
-
-
-PROV_PROFILES_DIR="#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
 
 
 def matcher(string)
@@ -121,9 +115,14 @@ end
 # Call the appropriate action
 
 if ARGV.empty?
-  PProf::CLI::print_filtered_list(filters)
+  # Print list of matching profiles
+  o = PProf::OutputFormatter.new
+  o.print_filtered_list(PProf::ProvisioningProfile::DEFAULT_DIR, filters)
 else
+  # Print info about given profile path/UUID
+  p = PProf::ProvisioningProfile.new(ARGV[0])
+  
+  o = PProf::OutputFormatter.new
   options = { :info => true } if options.empty?
-  path = (ARGV[0] =~ %r/^[0-9A-F-]*$/i) ? "#{PROV_PROFILES_DIR}/#{ARGV[0]}.mobileprovision" : ARGV[0]
-  PProf::CLI::print_info(path, options)
+  o.print_info(p, options)
 end

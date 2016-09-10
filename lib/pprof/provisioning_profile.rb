@@ -4,8 +4,15 @@ require 'time'
 
 module PProf
   class ProvisioningProfile
+    DEFAULT_DIR="#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
+
     def initialize(file)
-      pkcs7 = OpenSSL::PKCS7.new(File.read(file))
+      if file =~ %r/^[0-9A-F-]*$/i
+        path = "#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.mobileprovision"
+      else
+        path = file
+      end
+      pkcs7 = OpenSSL::PKCS7.new(File.read(path))
       pkcs7.verify([], OpenSSL::X509::Store.new)
       @plist = Plist::parse_xml(pkcs7.data)
     end

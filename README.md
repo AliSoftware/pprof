@@ -25,12 +25,6 @@ As of now this library is very early stage and hasn't been pushed on RubyGems ye
 
 * You can also use it to list all your Provisioning Profiles and their inner information, like the provisioned device UDIDs, the list of certificates (with their associated subject/name), etc.
 
-### Using it in Ruby
-
-```ruby
-# @todo: Add example Ruby usages
-```
-
 ### Using it from the command line
 
 ```sh
@@ -77,12 +71,80 @@ $ pprof --certs --devices --info
 $ pprof -cdi '12345678-ABCD-EF90-1234-567890ABCDEF'
 ```
 
+### Using it in Ruby
+
+```ruby
+require 'pprof'
+# Load the Provisioning Profile
+p = PProf::ProvisioningProfile.new('12345678-ABCD-EF90-1234-567890ABCDEF')
+
+# Print various informations
+puts p.name
+puts p.team_name
+puts p.entitlements.aps_environment
+puts p.provisioned_devices.count
+
+# Use an OutputFormatter to pretty-print the info
+o = PProf::OutputFormatter.new
+o.print_info(p)
+
+# You can also print into any IO other than $stdout, like a File
+certs_file = File.new('certs.txt', 'w')
+o2 = PProf::OutputFormatter.new(certs_file)
+o2.print_info(p, :certs => true)
+certs_file.close
+
+# And you can easily loop on all provisioning profiles and manipulate each
+dir = PProf::ProvisioningProfile::DEFAULT_DIR
+Dir["#{dir}/*.mobileprovision"].each do |file|
+  p = PProf::ProvisioningProfile.new(file)
+  puts p.name
+end
+```
+
 
 ## Anatomy of a Provisioning Profile
 
-Provisioning Profiles are in fact PKCS7 files which contain a plist payload. That plist payload itself contains various data, including some textual information (Team Name, AppID, …), dates (expiration date, etc) but also X509 Certificates (`OpenSSL::X509::Certificate`).
+Provisioning Profiles are in fact PKCS7 files which contain a plist payload. 
 
-> TODO:
-> 
-> * Structured list of attributes of `class ProvisioningProfile`
-> * Link to the RubyDoc once published on rubygems.
+That plist payload itself contains various data, including some textual information (Team Name, AppID, …), dates (expiration date, etc) but also X509 Certificates (`OpenSSL::X509::Certificate`).
+
+<details>
+<summary>Outline of the two main classes `ProvisioningProfile` and `Entitlements`</summary>
+
+```ruby
+PProf::ProvisioningProfile
+    ::DEFAULT_DIR
+    new(file) => PProf::ProvisioningProfile
+    to_hash => Hash<String, Any>
+    
+    name => String
+    uuid => String
+    app_id_name => String
+    app_id_prefix => String
+    creation_date => DateTime
+    expiration_date => DateTime
+    ttl => Int
+    team_ids => Array<String>
+    team_name => String
+    developer_certificates => Array<OpenSSL::X509::Certificate>
+    entitlements => PProf::Entitlements
+    provisioned_devices => Array<String>
+    provisions_all_devices => Bool
+
+PProf::Entitlements
+    new(dict) => PProf::Entitlements
+    to_hash => Hash<String, Any>
+    
+    keychain_access_groups => Array<String>
+    get_task_allow => Bool
+    app_id => String
+    team_id => String
+    aps_environment => String
+    app_groups => Array<String>
+    beta_reports_active => Bool
+    healthkit => Bool
+    ubiquity_container_identifiers => Array<String>
+    ubiquity_kvstore_identifier => String
+```
+</details>
