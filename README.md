@@ -17,7 +17,7 @@ As of now this library is very early stage and hasn't been pushed on RubyGems ye
 
 * Clone the repository
 * Build it using `gem build pprof.gemspec`
-* Install it using `gem install pprof-0.1.0.gem`
+* Install it using `gem install pprof-0.2.0.gem`
 
 ## Example usages
 
@@ -34,7 +34,47 @@ As of now this library is very early stage and hasn't been pushed on RubyGems ye
 ### Using it from the command line
 
 ```sh
-# TODO: Add example CLI usages
+# List all provisioning profiles
+$ pprof 
+
+# Filter provisioning profiles by name
+$ pprof --name foo         # only ones containing 'foo', case sensitive
+$ pprof --name /foo/i      # only ones containing 'foo', case insensitive
+$ pprof --name '/foo|bar/' # only ones containing 'foo' or 'bar'
+$ pprof --name /^foo$/     # only the ones exactly matching 'foo'
+
+# Filter by AppID
+$ pprof --appid com.foo             # only ones containing 'com.foo'
+$ pprof --appid '/com\.(foo|bar)/'  # only ones containing 'com.foo' or 'com.bar'
+
+# List only provisioning profiles having push notifications
+$ pprof --aps
+$ pprof --aps development
+$ pprof --aps production
+
+# List only provisioning profiles being expired or not
+$ pprof --exp
+$ pprof --no-exp
+
+# List only provisioning profiles containing provisioned devices
+$ pprof --has-devices
+
+# Combine filters
+$ pprof --has-devices --aps --appid com.foo
+```
+```sh
+# Print info for a given Provisioning Profile
+$ pprof '12345678-ABCD-EF90-1234-567890ABCDEF'
+
+# Print certificates in a given PP
+$ pprof --certs '12345678-ABCD-EF90-1234-567890ABCDEF'
+
+# Print devices in a given PP
+$ pprof --devices '12345678-ABCD-EF90-1234-567890ABCDEF'
+
+# Print all info on a given PP
+$ pprof --certs --devices --info
+$ pprof -cdi '12345678-ABCD-EF90-1234-567890ABCDEF'
 ```
 
 

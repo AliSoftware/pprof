@@ -1,53 +1,116 @@
 #!/usr/bin/env ruby
 
 require 'pprof'
+require 'optparse'
+require File.expand_path('cli/ascii_table', File.dirname(__FILE__))
+require File.expand_path('cli/info', File.dirname(__FILE__))
+require File.expand_path('cli/list', File.dirname(__FILE__))
+
 
 PROV_PROFILES_DIR="#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
 
 
-class SimpleASCIITable
-  def initialize(*widths)
-    @widths = widths
-  end
-
-  def print_header(*headers)
-    header_line = line(headers)
-    puts header_line
-    puts '-' * header_line.length
-  end
-
-  def print_row(*columns)
-    puts line(columns)
-  end
-
-  private
-  def line(cols)
-    '| ' + cols.zip(@widths).map do |c,w|
-      (c || '<nil>').to_s.ljust(w)[0...w]
-    end.join(' | ') + ' |'
+def matcher(string)
+  m = string.match(%r[^/(.*)/(.*)$])
+  if m.nil?
+    Regexp.new(Regexp.escape(string))
+  else
+    Regexp.new(m[1], m[2].empty? ? nil : m[2])
   end
 end
 
+filters = {}
+options = {}
+parser = OptionParser.new do |opts|
+  opts.banner = <<-BANNER.gsub(/^ *\|/,'')
+    |Usage:
+    |  pprof [options] [PATH|UUID]
+    |  pprof [filters]
+    |
+    |Note: All filters expecting a string are interpreted as regular expressions if surrounded by slashes
+  BANNER
+
+  opts.separator ""
+  opts.separator "Print options"
+
+  opts.on("-i", "--info", "Print general info (default)") do
+    options[:info] = true
+  end
+  opts.on("-c", "--certs", "Print certificates") do
+    options[:certs] = true
+  end
+  opts.on("-d", "--devices", "Print provisioned devices") do
+    options[:devices] = true
+  end
+
+  opts.separator ""
+  opts.separator "Filters"
+
+  opts.on("-n", "--name NAME", "Filter by name") do |name|
+    filters[:name] = matcher(name)
+  end
+
+  opts.on("--appid-name APPID", "Filter by App ID Name") do |appid_name|
+    filters[:appid_name] = matcher(appid_name)
+  end
+
+  opts.on("-a", "--appid APPID", "Filter by App ID") do |appid|
+    filters[:appid] = matcher(appid)
+  end
+
+  opts.on("--uuid UUID", "Filter by UUID") do |uuid|
+    filters[:uuid] = matcher(uuid)
+  end
+
+  opts.on("-e", "--no-exp [DATE]", "Only profiles (not) expired") do |flag|
+    filters[:exp] = flag
+  end
+
+  opts.on("--[no-]has-devices", "Filter by profiles having (no) provisioned devices") do |d|
+    filters[:has_devices] = d
+  end
+
+  opts.on("--[no-]all-devices", "Filter by profiles (not) provisioning all devices") do |d|
+    filters[:all_devices] = d
+  end
+
+  opts.on("--aps [ENV]", "Only profiles having Push entitlements (on a specific aps env)") do |env|
+    filters[:aps_env] = env.nil? ? true : matcher(env)
+  end
 
 
-# @todo Implement getopts to make that a real command line tool
-# @todo Add options to filter by date, team,  name, AppID, …
-# @todo Add option to list all pp (current behavior)
-# @todo Add option to read a single pp file and get more detailed info
-if ARGV.length > 0
-  puts 'Usage: pprof'
-  puts ''
-  puts "  pprof version #{PProf::VERSION}, by O.Halligon"
+  opts.separator ""
+  opts.separator "Misc"
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+
+  opts.on_tail("-v", "--version", "Show version") do
+    puts PProf::VERSION
+    exit
+  end
+end
+parser.parse!
+
+puts filters[:name].inspect
+unless filters.empty? || ARGV.empty?
+  puts "You should use either filter flags to filter the whole list, or an specific path, not both."
+  puts parser # Usage
   exit
 end
 
-
-table = SimpleASCIITable.new(36, 50, 35, 25, 2, 10)
-table.print_header('uuid', 'name', 'AppID name', 'Expiration Date', ' ', 'Team Name')
-
-Dir[PROV_PROFILES_DIR + '/*.mobileprovision'].each do |file|
-  p = PProf::ProvisioningProfile.new(file)
-  state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
-  table.print_row(p.uuid, p.name, p.app_id_name, p.expiration_date.to_time, state, p.team_name)
+unless options.empty? || !ARGV.empty?
+  puts "You should use option flags only when providing an specific path."
+  puts parser # Usage
+  exit
 end
 
+if ARGV.empty?
+  PProf::CLI::print_list(filters)
+else
+  options = { :info => true } if options.empty?
+  path = (ARGV[0] =~ %r/^[0-9A-F-]*$/i) ? "#{PROV_PROFILES_DIR}/#{ARGV[0]}.mobileprovision" : ARGV[0]
+  PProf::CLI::print_info(path, options)
+end

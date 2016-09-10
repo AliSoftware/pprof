@@ -74,7 +74,7 @@ module PProf
 
     # @return [Bool]
     def provisions_all_devices
-      @plist['ProvisionsAllDevices']
+      @plist['ProvisionsAllDevices'] || false
     end
 
     def to_hash
@@ -82,17 +82,14 @@ module PProf
     end
 
     def to_s
-      ent_list = entitlements.to_s.split("\n").map { |line| "   #{line}" }.join("\n")
       lines = [:name, :uuid, :app_id_name, :app_id_prefix, :creation_date, :expiration_date, :ttl, :team_ids, :team_name].map do |key|
         "- #{key.to_s}: #{self.send(key.to_sym)}"
       end +
       [
         "- #{developer_certificates.count} Developer Certificates",
-        developer_certificates.map { |cert| "   - #{cert.subject}" }.join("\n"),
         "- #{provisioned_devices.count} Provisioned Devices",
-        provisioned_devices.map { |udid| "   - #{udid}" }.join("\n"),
-        "- Entitlements:\n#{ent_list}"
-      ]
+        "- Entitlements:"
+      ] + entitlements.to_hasg.map { |key, value| "   - #{key}: #{value}" }
       lines.join("\n")
     end
   end
