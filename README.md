@@ -11,7 +11,8 @@ It can help you create ruby scripts to list, get information, find and filter Pr
 
 ### Rubygems
 
-As of now this library is very early stage and hasn't been pushed on RubyGems yet. (Will do as soon as I improve the binary command line a bit)
+As of now this library is very early stage and [hasn't been pushed on RubyGems yet](https://github.com/AliSoftware/pprof/issues/4).
+I intend to push it as soon as [#2](https://github.com/AliSoftware/pprof/issues/4) and [#3](https://github.com/AliSoftware/pprof/issues/4) are addressed.
 
 ### Build from source
 
