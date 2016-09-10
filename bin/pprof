@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+
+require 'pprof'
+
+PROV_PROFILES_DIR="#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
+
+
+class SimpleASCIITable
+  def initialize(*widths)
+    @widths = widths
+  end
+
+  def print_header(*headers)
+    header_line = line(headers)
+    puts header_line
+    puts '-' * header_line.length
+  end
+
+  def print_row(*columns)
+    puts line(columns)
+  end
+
+  private
+  def line(cols)
+    '| ' + cols.zip(@widths).map do |c,w|
+      (c || '<nil>').to_s.ljust(w)[0...w]
+    end.join(' | ') + ' |'
+  end
+end
+
+
+
+# @todo Implement getopts to make that a real command line tool
+# @todo Add options to filter by date, team,  name, AppID, …
+# @todo Add option to list all pp (current behavior)
+# @todo Add option to read a single pp file and get more detailed info
+if ARGV.length > 0
+  puts 'Usage: pprof'
+  puts ''
+  puts "  pprof version #{PProf::VERSION}, by O.Halligon"
+  exit
+end
+
+
+table = SimpleASCIITable.new(36, 50, 35, 25, 2, 10)
+table.print_header('uuid', 'name', 'AppID name', 'Expiration Date', ' ', 'Team Name')
+
+Dir[PROV_PROFILES_DIR + '/*.mobileprovision'].each do |file|
+  p = PProf::ProvisioningProfile.new(file)
+  state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
+  table.print_row(p.uuid, p.name, p.app_id_name, p.expiration_date.to_time, state, p.team_name)
+end
+
