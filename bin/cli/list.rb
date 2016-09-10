@@ -1,22 +1,43 @@
 module PProf
   module CLI
-    def self.print_list(filters = {})
+    # Prints the filtered list
+    #
+    # Convenience method. Calls self.print_list with a block build from a filter hash
+    #
+    # @param [Hash<Symbol,?>] filters
+    #        The hash describing the applied filters
+    #
+    def self.print_filtered_list(filters = {})
+      self.print_list do |p|
+        (filters[:name].nil? || p.name =~ filters[:name]) &&
+        (filters[:appid_name].nil? || p.app_id_name =~ filters[:appid_name]) &&
+        (filters[:appid].nil? || p.entitlements.app_id =~ filters[:appid]) &&
+        (filters[:uuid].nil? || p.uuid =~ filters[:uuid]) &&
+        (filters[:exp].nil? || (p.expiration_date < DateTime.now) == filters[:exp]) &&
+        (filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]) &&
+        (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
+        (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
+        true
+      end
+    end
+
+    # Prints the filtered list
+    #
+    # @param [Proc] match_block
+    #        The block to validate each provisioning provile.
+    #        it's given the ProvisioningProfile object and should
+    #        return true to display the row, falst to filter it out
+    #
+    def self.print_list(&match_block)   
       count = 0
 
       table = PProf::CLI::ASCIITable.new(36, 60, 45, 25, 2, 10)
-      table.print_header('uuid', 'name', 'AppID', 'Expiration Date', ' ', 'Team Name')
+      table.print_header('UUID', 'Name', 'AppID', 'Expiration Date', ' ', 'Team Name')
 
       Dir[PROV_PROFILES_DIR + '/*.mobileprovision'].each do |file|
         p = PProf::ProvisioningProfile.new(file)
         
-        next unless filters[:name].nil? || p.name =~ filters[:name]
-        next unless filters[:appid_name].nil? || p.app_id_name =~ filters[:appid_name]
-        next unless filters[:appid].nil? || p.entitlements.app_id =~ filters[:appid]
-        next unless filters[:uuid].nil? || p.uuid =~ filters[:uuid]
-        next unless filters[:exp].nil? || (p.expiration_date < DateTime.now) == filters[:exp]
-        next unless filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]
-        next unless filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]
-        next unless filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])
+        next unless match_block.call(p)
 
         state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
         table.print_row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
@@ -24,7 +45,7 @@ module PProf
       end
 
       table.print_separator
-      puts "#{count}#{filters.empty? ? '' : ' matching'} Provisioning Profiles found."
+      puts "#{count} Provisioning Profiles found."
     end
 
     private

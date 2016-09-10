@@ -94,7 +94,6 @@ parser = OptionParser.new do |opts|
 end
 parser.parse!
 
-puts filters[:name].inspect
 unless filters.empty? || ARGV.empty?
   puts "You should use either filter flags to filter the whole list, or an specific path, not both."
   puts parser # Usage
@@ -108,7 +107,7 @@ unless options.empty? || !ARGV.empty?
 end
 
 if ARGV.empty?
-  PProf::CLI::print_list(filters)
+  PProf::CLI::print_filtered_list(filters)
 else
   options = { :info => true } if options.empty?
   path = (ARGV[0] =~ %r/^[0-9A-F-]*$/i) ? "#{PROV_PROFILES_DIR}/#{ARGV[0]}.mobileprovision" : ARGV[0]
