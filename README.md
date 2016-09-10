@@ -22,9 +22,9 @@ I intend to push it as soon as [#2](https://github.com/AliSoftware/pprof/issues/
 
 ## Example usages
 
-* For example you can use it to find all the Provisioning Profiles that are attached to a given Team, or with a given AppID, or that will expire after a given date.
+* Find all the Provisioning Profiles that are attached to a given Team, or with a given AppID, or that will expire after a given date.
 
-* You can also use it to list all your Provisioning Profiles and their inner information, like the provisioned device UDIDs, the list of certificates (with their associated subject/name), etc.
+* List all your Provisioning Profiles and their inner information, like the provisioned device UDIDs, the list of certificates (with their associated subject/name), etc.
 
 ### Using it from the command line
 
