@@ -12,13 +12,13 @@ It can help you create ruby scripts to list, get information, find and filter Pr
 ### Rubygems
 
 As of now this library is very early stage and [hasn't been pushed on RubyGems yet](https://github.com/AliSoftware/pprof/issues/4).
-I intend to push it as soon as [#2](https://github.com/AliSoftware/pprof/issues/4) and [#3](https://github.com/AliSoftware/pprof/issues/4) are addressed.
+I intend to push it as soon as [#2](https://github.com/AliSoftware/pprof/issues/4) (unit tests) and [#3](https://github.com/AliSoftware/pprof/issues/4) (CHANGELOG) are addressed.
 
 ### Build from source
 
 * Clone the repository
 * Build it using `gem build pprof.gemspec`
-* Install it using `gem install pprof-0.2.0.gem`
+* Install it using `gem install pprof-0.3.0.gem`
 
 ## Example usages
 
