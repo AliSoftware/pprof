@@ -54,6 +54,32 @@ module PProf
       @dict['com.apple.developer.ubiquity-kvstore-identifier']
     end
 
+    # Access entitlements by key
+    #
+    # @param [#to_s] key
+    #        The entitlement key to read
+    #
+    def [](key)
+      @dict[key.to_s]
+    end
+
+    # Check if a given entitlement key is present
+    #
+    # @param [#to_s] key
+    #        The key to check
+    #
+    def has_key?(key)
+      @dict.has_key?(key.to_s)
+    end
+
+    # The list of entitlement keys as String
+    #
+    # @return [Array<String>]
+    #
+    def keys
+      @dict.keys.map(&:to_s)
+    end
+
     def to_hash
       @dict
     end

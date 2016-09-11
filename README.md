@@ -18,7 +18,7 @@ I intend to push it as soon as [#2](https://github.com/AliSoftware/pprof/issues/
 
 * Clone the repository
 * Build it using `gem build pprof.gemspec`
-* Install it using `gem install pprof-0.3.0.gem`
+* Install it using `gem install pprof-0.3.1.gem`
 
 ## Example usages
 
@@ -136,6 +136,9 @@ PProf::ProvisioningProfile
 PProf::Entitlements
     new(dict) => PProf::Entitlements
     to_hash => Hash<String, Any>
+    [](key) => Any
+    has_key?(key) => Bool
+    keys => Array<String>
     
     keychain_access_groups => Array<String>
     get_task_allow => Bool
