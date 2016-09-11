@@ -68,7 +68,7 @@ $ pprof --certs '12345678-ABCD-EF90-1234-567890ABCDEF'
 $ pprof --devices '12345678-ABCD-EF90-1234-567890ABCDEF'
 
 # Print all info on a given PP
-$ pprof --certs --devices --info
+$ pprof --certs --devices --info '12345678-ABCD-EF90-1234-567890ABCDEF'
 $ pprof -cdi '12345678-ABCD-EF90-1234-567890ABCDEF'
 ```
 
@@ -149,3 +149,17 @@ PProf::Entitlements
     ubiquity_kvstore_identifier => String
 ```
 </details>
+
+## Contributing
+
+There's plenty of room for improvement, including:
+
+* Additional filters
+* Ability to change the output format
+* Parsing of additional entitlement keys
+
+Don't hesitate to contribute, either with an Issue to give ideas or additional keys that aren't parsed yet, or via a Pull Request to provide new features yourself!
+
+## License
+
+This project is under the MIT license. See `LICENSE` file for more details.
