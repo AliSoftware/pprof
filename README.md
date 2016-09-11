@@ -90,10 +90,10 @@ o = PProf::OutputFormatter.new
 o.print_info(p)
 
 # You can also print into any IO other than $stdout, like a File
-certs_file = File.new('certs.txt', 'w')
-o2 = PProf::OutputFormatter.new(certs_file)
-o2.print_info(p, :certs => true)
-certs_file.close
+File.open('certs.txt', 'w') do |file|
+  o2 = PProf::OutputFormatter.new(file)
+  o2.print_info(p, :certs => true)
+end
 
 # And you can easily loop on all provisioning profiles and manipulate each
 dir = PProf::ProvisioningProfile::DEFAULT_DIR
