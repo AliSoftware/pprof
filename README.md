@@ -12,8 +12,11 @@ It can help you create ruby scripts to list, get information, find and filter Pr
 
 ### Rubygems
 
-As of now this library is very early stage and [hasn't been pushed on RubyGems yet](https://github.com/AliSoftware/pprof/issues/4).
-I intend to push it as soon as [#2](https://github.com/AliSoftware/pprof/issues/4) (unit tests) and [#3](https://github.com/AliSoftware/pprof/issues/4) (CHANGELOG) are addressed.
+```sh
+$ gem install pprof
+```
+
+_(You might need to run this command with `sudo` if your gem home is a system directory)_
 
 ### Build from source
 
