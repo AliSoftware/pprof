@@ -2,13 +2,17 @@
 
 This file lists the changes for the `pprof` gem.
 
-## 0.3.3
+## 0.3.4
 
 * Update the gem homepage
 * Added badge in README
 * Added `CHANGELOG`.  
 [#3](https://github.com/AliSoftware/pprof/issues/3)
 * Improved ruby documentation
+
+## 0.3.3
+
+Basically contains the changes listed in 0.3.4, but had to be yanked from RubyGems after a bad manipulation.
 
 ## 0.3.2
 
