@@ -3,7 +3,9 @@
 require 'pprof'
 require 'optparse'
 
-
+# Creates a Regex if the string is wrapped inside `/…/`
+# Or a standard match if the string is bare.
+#
 def matcher(string)
   m = string.match(%r[^/(.*)/(.*)$])
   if m.nil?
@@ -17,17 +19,19 @@ end
 
 filters = {}
 options = {}
+list_options = { :mode => :table }
+
 parser = OptionParser.new do |opts|
   opts.banner = <<-BANNER.gsub(/^ *\|/,'')
     |Usage:
-    |  pprof [options] [PATH|UUID]
-    |  pprof [filters]
+    |  pprof [print_options] [PATH|UUID]
+    |  pprof [list_options] [filters]
     |
     |Note: All filters expecting a string are interpreted as regular expressions if surrounded by slashes
   BANNER
 
   opts.separator ""
-  opts.separator "Print options"
+  opts.separator "Print options (when file given)"
 
   opts.on("-i", "--info", "Print general info (default)") do
     options[:info] = true
@@ -40,9 +44,22 @@ parser = OptionParser.new do |opts|
   end
 
   opts.separator ""
-  opts.separator "Filters"
+  opts.separator "List options (when no file given)"
 
-  opts.on("-n", "--name NAME", "Filter by name") do |name|
+  opts.on("-l", "--list", "Print only the UUIDs, one per line (instead of an ASCII table)") do
+    list_options[:mode] = :list
+  end
+  opts.on("-p", "--path", "Print only the paths, one per line (instead of an ASCII table)") do
+    list_options[:mode] = :path
+  end
+  opts.on("-0", "--print0", "Separate each found entry by \0, to be used by `xargs -0`") do
+    list_options[:zero] = true
+  end
+
+  opts.separator ""
+  opts.separator "Filters (when no file given)"
+
+  opts.on("--name NAME", "Filter by name") do |name|
     filters[:name] = matcher(name)
   end
 
@@ -50,7 +67,7 @@ parser = OptionParser.new do |opts|
     filters[:appid_name] = matcher(appid_name)
   end
 
-  opts.on("-a", "--appid APPID", "Filter by App ID") do |appid|
+  opts.on("--appid APPID", "Filter by App ID") do |appid|
     filters[:appid] = matcher(appid)
   end
 
@@ -58,7 +75,11 @@ parser = OptionParser.new do |opts|
     filters[:uuid] = matcher(uuid)
   end
 
-  opts.on("-e", "--[no-]exp", "Only profiles (not) expired") do |flag|
+  opts.on("--team TEAM", "Filter by team name or ID") do |team|
+    filters[:team] = matcher(team)
+  end
+
+  opts.on("--[no-]exp", "Only profiles (not) expired") do |flag|
     filters[:exp] = flag
   end
 
@@ -117,7 +138,8 @@ end
 if ARGV.empty?
   # Print list of matching profiles
   o = PProf::OutputFormatter.new
-  o.print_filtered_list(PProf::ProvisioningProfile::DEFAULT_DIR, filters)
+  list_options[:mode] = :path if list_options[:zero] && list_options[:mode] == :table
+  o.print_filtered_list(PProf::ProvisioningProfile::DEFAULT_DIR, filters, list_options)
 else
   # Print info about given profile path/UUID
   p = PProf::ProvisioningProfile.new(ARGV[0])

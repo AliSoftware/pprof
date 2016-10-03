@@ -60,7 +60,11 @@ $ pprof --has-devices
 
 # Combine filters
 $ pprof --has-devices --aps --appid com.foo
+
+# List only the expired profiles, and pipe the resulting list to xargs to remove them all
+$ pprof --exp -0 | xargs -0 rm
 ```
+
 ```sh
 # Print info for a given Provisioning Profile
 $ pprof '12345678-ABCD-EF90-1234-567890ABCDEF'

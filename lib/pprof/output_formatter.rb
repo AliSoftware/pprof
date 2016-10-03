@@ -71,24 +71,44 @@ module PProf
     #
     # Convenience method. Calls self.print_list with a filter block build from a filter hash
     #
+    # @param [String] dir
+    #        The directory to search for the provisioning profiles. Defaults to the standard directory on Mac
+    #
     # @param [Hash<Symbol,Any>] filters
     #        The hash describing the applied filters
     #
-    def print_filtered_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, filters = {})
-      print_list(dir) do |p|
+    # @param [Hash<Symbol,Any>] list_options
+    #        The way to print the output.
+    #        * Valid values for key `:mode` are:
+    #          - `:table` (for ASCII table output)
+    #          - `:list` (for plain list of only the UUIDs, suitable for piping to `xargs`)
+    #          - `:path` (for plain list of only the paths, suitable for piping to `xargs`)
+    #        * Valid values for key `:zero` are `true` or `false` to decide if we print `\0` at the end of each output.
+    #          Only used by `:list` and `:path` modes
+    #
+    def print_filtered_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, filters = {}, list_options = { :mode => :table })
+      filter_func = lambda do |p|
         (filters[:name].nil? || p.name =~ filters[:name]) &&
         (filters[:appid_name].nil? || p.app_id_name =~ filters[:appid_name]) &&
         (filters[:appid].nil? || p.entitlements.app_id =~ filters[:appid]) &&
         (filters[:uuid].nil? || p.uuid =~ filters[:uuid]) &&
+        (filters[:team].nil? || p.team_name =~ filters[:team] || p.team_ids.any? { |id| id =~ filters[:team] }) &&
         (filters[:exp].nil? || (p.expiration_date < DateTime.now) == filters[:exp]) &&
         (filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]) &&
         (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
         (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
         true
       end
+
+      case list_options[:mode]
+      when :table
+        print_table(dir, &filter_func)
+      else
+        print_list(dir, list_options, &filter_func)
+      end
     end
 
-    # Prints the filtered list
+    # Prints the filtered list as a table
     #
     # @param [String] dir
     #        The directory containing the mobileprovision files to list.
@@ -98,7 +118,7 @@ module PProf
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR)
+    def print_table(dir = PProf::ProvisioningProfile::DEFAULT_DIR)
       count = 0
 
       table = PProf::OutputFormatter::ASCIITable.new(36, 60, 45, 25, 2, 10)
@@ -119,6 +139,27 @@ module PProf
       @output.puts table.separator
       @output.puts "#{count} Provisioning Profiles found."
     end
+
+    # Prints the filtered list of UUIDs or Paths only
+    #
+    # @param [String] dir
+    #        The directory containing the mobileprovision files to list.
+    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
+    #
+    # @yield each provisioning provile for filtering/validation
+    #        The block is given ProvisioningProfile object and should
+    #        return true to display the row, false to filter it out
+    #
+    def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options)
+      Dir[dir + '/*.mobileprovision'].each do |file|
+        p = PProf::ProvisioningProfile.new(file)
+        next if block_given? && !yield(p)
+
+        @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
+        @output.print options[:zero] ? "\0" : "\n"
+      end
+    end
+
 
     private
     def self.match_aps_env(actual, expected)
