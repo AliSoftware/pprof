@@ -166,7 +166,6 @@ PProf::Entitlements
 There's plenty of room for improvement, including:
 
 * Additional filters
-* Ability to change the output format
 * Parsing of additional entitlement keys
 
 Don't hesitate to contribute, either with an Issue to give ideas or additional keys that aren't parsed yet, or via a Pull Request to provide new features yourself!
