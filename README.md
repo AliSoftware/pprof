@@ -22,7 +22,7 @@ _(You might need to run this command with `sudo` if your gem home is a system di
 
 * Clone the repository
 * Build it using `gem build pprof.gemspec`
-* Install it using `gem install pprof-0.3.1.gem`
+* Install it using `gem install pprof-*.gem` (replace `*` with the current version number)
 
 ## Example usages
 
