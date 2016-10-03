@@ -24,7 +24,7 @@ list_options = { :mode => :table }
 parser = OptionParser.new do |opts|
   opts.banner = <<-BANNER.gsub(/^ *\|/,'')
     |Usage:
-    |  pprof [print_options] [PATH|UUID]
+    |  pprof [print_options] (PATH|UUID)
     |  pprof [list_options] [filters]
     |
     |Note: All filters expecting a string are interpreted as regular expressions if surrounded by slashes
@@ -52,7 +52,7 @@ parser = OptionParser.new do |opts|
   opts.on("-p", "--path", "Print only the paths, one per line (instead of an ASCII table)") do
     list_options[:mode] = :path
   end
-  opts.on("-0", "--print0", "Separate each found entry by \0, to be used by `xargs -0`") do
+  opts.on("-0", "--print0", "Separate each found entry by \\0, to be used by `xargs -0`") do
     list_options[:zero] = true
   end
 
@@ -91,7 +91,7 @@ parser = OptionParser.new do |opts|
     filters[:all_devices] = d
   end
 
-  opts.on("--aps [ENV]", "Only profiles having Push entitlements (on a specific aps env)") do |env|
+  opts.on("--aps [ENV]", "Only profiles having Push entitlements (or a specific aps env)") do |env|
     filters[:aps_env] = env.nil? ? true : matcher(env)
   end
 
