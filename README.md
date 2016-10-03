@@ -6,7 +6,7 @@
 
 `pprof` is a ruby library and binary to manipulate Provisioning Profiles.
 
-It can help you create ruby scripts to list, get information, find and filter Provisioning Profiles easily.
+It can help you create ruby scripts to list, get information, find and filter local Provisioning Profiles easily.
 
 ## Installation
 
