@@ -58,7 +58,7 @@ parser = OptionParser.new do |opts|
     filters[:uuid] = matcher(uuid)
   end
 
-  opts.on("-e", "--no-exp [DATE]", "Only profiles (not) expired") do |flag|
+  opts.on("-e", "--[no-]exp", "Only profiles (not) expired") do |flag|
     filters[:exp] = flag
   end
 
