@@ -2,6 +2,7 @@
 
 [![Twitter: @aligatr](https://img.shields.io/badge/contact-@aligatr-blue.svg?style=flat)](https://twitter.com/aligatr)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/AliSoftware/pprof/blob/master/LICENSE)
+[![Gem Version](https://badge.fury.io/rb/pprof.svg)](https://badge.fury.io/rb/pprof)
 
 `pprof` is a ruby library and binary to manipulate Provisioning Profiles.
 

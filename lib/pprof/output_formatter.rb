@@ -1,4 +1,6 @@
+# Module for the pprof tool to manipulate Provisioning Profiles
 module PProf
+  # A helper tool to pretty-print Provisioning Profile informations
   class OutputFormatter
     # Initialize a new OutputFormatter
     #
@@ -12,16 +14,25 @@ module PProf
 
     # A small helper to print ASCII tables
     class ASCIITable
+      # Create a new ASCII table
+      #
+      # @param [Int...] widths
+      #        The list of width for each colum of the table
       def initialize(*widths)
         @widths = widths
       end
 
+      # Add a new row to the ASCII table
+      #
+      # @param [String...] cols
+      #        The content of each column of the row to add
       def row(*cols)
         '| ' + cols.zip(@widths).map do |c,w|
           (c || '<nil>').to_s.ljust(w)[0...w]
         end.join(' | ') + ' |'
       end
 
+      # Add a separator line to the ASCII table
       def separator
         '+' + @widths.map { |w| '-' * (w+2) }.join('+') + '+' 
       end

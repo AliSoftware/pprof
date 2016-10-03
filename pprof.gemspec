@@ -3,12 +3,11 @@ require File.expand_path('lib/pprof/version', File.dirname(__FILE__))
 Gem::Specification.new do |s|
   s.name        = 'pprof'
   s.version     = PProf::VERSION
-  s.date        = '2016-09-09'
   s.summary     = "A Provisioning Profiles library"
   s.description = "library and binary tool to manipulate Provisioning Profile files"
   s.authors     = ["Olivier Halligon"]
   s.email       = 'olivier@halligon.net'
-  s.homepage    = 'http://rubygems.org/gems/pp'
+  s.homepage    = 'https://github.com/AliSoftware/pprof'
   s.license     = 'MIT'
 
   s.files       = Dir["lib/**/*"] + Dir["bin/**/*"] + %w(README.md LICENSE)
