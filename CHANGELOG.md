@@ -2,6 +2,10 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.3.6
+
+* Now catching errors when parsing a provisioning profile file and printing the error(s) at the end of the output.
+
 ## 0.3.5
 
 * Added `--team` filter to filter by team or team ID.

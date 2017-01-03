@@ -142,9 +142,13 @@ if ARGV.empty?
   o.print_filtered_list(PProf::ProvisioningProfile::DEFAULT_DIR, filters, list_options)
 else
   # Print info about given profile path/UUID
-  p = PProf::ProvisioningProfile.new(ARGV[0])
-  
   o = PProf::OutputFormatter.new
-  options = { :info => true } if options.empty?
-  o.print_info(p, options)
+  begin
+    p = PProf::ProvisioningProfile.new(ARGV[0])
+    
+    options = { :info => true } if options.empty?
+    o.print_info(p, options)
+  rescue Exception => e
+    o.print_error(e, ARGV[0])
+  end
 end

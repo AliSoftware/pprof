@@ -27,6 +27,7 @@ module PProf
       pkcs7 = OpenSSL::PKCS7.new(File.read(path))
       pkcs7.verify([], OpenSSL::X509::Store.new)
       @plist = Plist::parse_xml(pkcs7.data)
+      raise "Can'Unable to parse file #{file}." if @plist.nil?
     end
 
     # The name of the Provisioning Profile

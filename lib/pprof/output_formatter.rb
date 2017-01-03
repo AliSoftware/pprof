@@ -38,6 +38,17 @@ module PProf
       end
     end
 
+    # Prints an error message
+    #
+    # @param [String] message
+    #        The error message to print
+    # @param [String] file
+    #        The provisioning profile file for which the error occurred
+    #
+    def print_error(message, file)
+      @output.puts "\u{274c}  #{file} - #{message}"
+    end
+
     # Prints the description of a Provisioning Profile
     #
     # @param [PProf::ProvisioningProfile] profile
@@ -120,6 +131,7 @@ module PProf
     #
     def print_table(dir = PProf::ProvisioningProfile::DEFAULT_DIR)
       count = 0
+      errors = []
 
       table = PProf::OutputFormatter::ASCIITable.new(36, 60, 45, 25, 2, 10)
       @output.puts table.separator
@@ -127,17 +139,25 @@ module PProf
       @output.puts table.separator
 
       Dir[dir + '/*.mobileprovision'].each do |file|
-        p = PProf::ProvisioningProfile.new(file)
+        begin
+          p = PProf::ProvisioningProfile.new(file)
         
-        next if block_given? && !yield(p)
+          next if block_given? && !yield(p)
 
-        state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
-        @output.puts table.row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
+          state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
+          @output.puts table.row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
+        rescue Exception => e
+          errors << { :message => e, :file => file }
+        end
         count += 1
       end
 
       @output.puts table.separator
       @output.puts "#{count} Provisioning Profiles found."
+
+      unless errors.empty?
+        errors.each { |e| print_error(e[:message], e[:file]) }
+      end
     end
 
     # Prints the filtered list of UUIDs or Paths only
