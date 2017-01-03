@@ -171,12 +171,20 @@ module PProf
     #        return true to display the row, false to filter it out
     #
     def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options)
+      errors = []
       Dir[dir + '/*.mobileprovision'].each do |file|
-        p = PProf::ProvisioningProfile.new(file)
-        next if block_given? && !yield(p)
+        begin
+          p = PProf::ProvisioningProfile.new(file)
+          next if block_given? && !yield(p)
 
-        @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
-        @output.print options[:zero] ? "\0" : "\n"
+          @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
+          @output.print options[:zero] ? "\0" : "\n"
+        rescue Exception => e
+          errors << { :message => e, :file => file }
+        end
+      end
+      unless errors.empty?
+        errors.each { |e| print_error(e[:message], e[:file]) }
       end
     end
 
