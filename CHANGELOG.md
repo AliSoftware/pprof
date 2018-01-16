@@ -2,6 +2,12 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.3.7
+
+* Fix case when the parsing of the PKCS7 payload fails using the OpenSSL payload
+  (which seems to happen on some Provisioning Profile files and with High Sierra)
+  to fallback to using `security cms` when OpenSSL fails.
+
 ## 0.3.6
 
 * Now catching errors when parsing a provisioning profile file and printing the error(s) at the end of the output.

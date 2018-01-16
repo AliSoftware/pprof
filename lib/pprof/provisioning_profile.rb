@@ -24,10 +24,21 @@ module PProf
       else
         path = file
       end
-      pkcs7 = OpenSSL::PKCS7.new(File.read(path))
-      pkcs7.verify([], OpenSSL::X509::Store.new)
-      @plist = Plist::parse_xml(pkcs7.data)
-      raise "Can'Unable to parse file #{file}." if @plist.nil?
+      xml = nil
+      begin
+        pkcs7 = OpenSSL::PKCS7.new(File.read(path))
+        pkcs7.verify([], OpenSSL::X509::Store.new)
+        xml = pkcs7.data
+      rescue
+        # Seems like sometimes OpenSSL fails to parse the PKCS7 payload
+        # Besides, OpenSSL is deprecated on macOS so might not be up-to-date on all machines
+        # So as a fallback, we run the `security` command line.
+        # (We could use `security` everytime, but invoking a command line is generally less 
+        #  efficient than calling the OpenSSL gem if available, so for now it's just used as fallback)
+        xml = `security cms -D -i "#{path}" 2> /dev/null`
+      end
+      @plist = Plist::parse_xml(xml)
+      raise "Unable to parse file #{file}." if @plist.nil?
     end
 
     # The name of the Provisioning Profile

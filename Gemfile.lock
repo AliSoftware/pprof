@@ -1,0 +1,18 @@
+PATH
+  remote: .
+  specs:
+    pprof (0.3.7)
+      plist (~> 3.1)
+
+GEM
+  specs:
+    plist (3.3.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  pprof!
+
+BUNDLED WITH
+   1.16.0
