@@ -27,7 +27,17 @@ parser = OptionParser.new do |opts|
     |  pprof [print_options] (PATH|UUID)
     |  pprof [list_options] [filters]
     |
-    |Note: All filters expecting a string are interpreted as regular expressions if surrounded by slashes
+    |Notes:
+    |  - All filters expecting a string are interpreted as regular expressions if surrounded by slashes
+    |    e.g. `pprof --name /.*InHouse.*Distribution.*/
+    |  - When using slashes to use a RegEx, you can also specify option flags.
+    |    Especially, use `/InHouse/i` for case-insensitive search
+    |  - Without slashes, the filter matches if the corresponding field _contains_ the searched string.
+    |    e.g. `pprof --name InHouse` matches any profile whose name _contains_ "InHouse"
+    |
+    |Tips:
+    |  - If you want to search for _exact_ match, you can use and anchored RegEx like `/^InHouse$/i`
+    |  - To remove all expired certificates, you can use `#{opts.program_name} -e0 | xargs -0 rm`
   BANNER
 
   opts.separator ""
