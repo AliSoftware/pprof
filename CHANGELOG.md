@@ -2,6 +2,10 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.3.8
+
+* Improved help banner (`pprof -h`) with notes and tips.
+
 ## 0.3.7
 
 * Fix case when the parsing of the PKCS7 payload fails using the OpenSSL payload
