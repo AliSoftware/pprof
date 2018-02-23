@@ -2,6 +2,11 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.3.9
+
+* Fix the case when the PKCS7 payload parsed with the OpenSSL gem is _empty_,
+  by using the same fallback to `security cms` which was introduced in 0.3.7
+
 ## 0.3.8
 
 * Improved help banner (`pprof -h`) with notes and tips.

@@ -29,6 +29,7 @@ module PProf
         pkcs7 = OpenSSL::PKCS7.new(File.read(path))
         pkcs7.verify([], OpenSSL::X509::Store.new)
         xml = pkcs7.data
+        raise "Empty PKCS7 payload" if xml.nil? || xml.empty?
       rescue
         # Seems like sometimes OpenSSL fails to parse the PKCS7 payload
         # Besides, OpenSSL is deprecated on macOS so might not be up-to-date on all machines
