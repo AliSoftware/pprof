@@ -1,18 +1,36 @@
 PATH
   remote: .
   specs:
-    pprof (0.3.7)
+    pprof (0.3.9)
       plist (~> 3.1)
 
 GEM
+  remote: http://rubygems.org/
   specs:
-    plist (3.3.0)
+    diff-lcs (1.3)
+    plist (3.4.0)
+    rspec (3.0.0)
+      rspec-core (~> 3.0.0)
+      rspec-expectations (~> 3.0.0)
+      rspec-mocks (~> 3.0.0)
+    rspec-core (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-example_steps (3.0.2)
+      rspec-core (>= 3.0.0)
+    rspec-expectations (3.0.4)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.0.0)
+    rspec-mocks (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-support (3.0.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   pprof!
+  rspec (= 3.0.0)
+  rspec-example_steps (~> 3.0.2)
 
 BUNDLED WITH
-   1.16.0
+   1.16.5
