@@ -2,6 +2,12 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.4.0
+
+* Make the output of `-c` (printing certificates in a provisioning profile) more verbose,
+  especially to include certificate serial number and expiration date.
+* Modernized the ruby codebase a bit, configuring and fixing rubocop violations.
+
 ## 0.3.9
 
 * Fix the case when the PKCS7 payload parsed with the OpenSSL gem is _empty_,
