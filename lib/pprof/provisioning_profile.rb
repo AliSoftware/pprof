@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'openssl'
 require 'plist'
 require 'time'
@@ -7,7 +9,7 @@ module PProf
   # Represents the content of a Provisioning Profile file
   class ProvisioningProfile
     # The default location where all the Provisioning Profiles are stored on a Mac
-    DEFAULT_DIR="#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
+    DEFAULT_DIR = "#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
 
     # Create a new ProvisioningProfile object from a file path or UUID
     #
@@ -19,26 +21,26 @@ module PProf
     #        File path or UUID of the ProvisioningProfile
     #
     def initialize(file)
-      if file =~ %r/^[0-9A-F-]*$/i
-        path = "#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.mobileprovision"
-      else
-        path = file
-      end
+      path = if file =~ /^[0-9A-F-]*$/i
+               "#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.mobileprovision"
+             else
+               file
+             end
       xml = nil
       begin
         pkcs7 = OpenSSL::PKCS7.new(File.read(path))
         pkcs7.verify([], OpenSSL::X509::Store.new)
         xml = pkcs7.data
-        raise "Empty PKCS7 payload" if xml.nil? || xml.empty?
-      rescue
+        raise 'Empty PKCS7 payload' if xml.nil? || xml.empty?
+      rescue StandardError
         # Seems like sometimes OpenSSL fails to parse the PKCS7 payload
         # Besides, OpenSSL is deprecated on macOS so might not be up-to-date on all machines
         # So as a fallback, we run the `security` command line.
-        # (We could use `security` everytime, but invoking a command line is generally less 
+        # (We could use `security` everytime, but invoking a command line is generally less
         #  efficient than calling the OpenSSL gem if available, so for now it's just used as fallback)
         xml = `security cms -D -i "#{path}" 2> /dev/null`
       end
-      @plist = Plist::parse_xml(xml)
+      @plist = Plist.parse_xml(xml)
       raise "Unable to parse file #{file}." if @plist.nil?
     end
 
@@ -101,7 +103,7 @@ module PProf
     def team_ids
       @plist['TeamIdentifier']
     end
-    
+
     # The name of the Team associated with this Provisioning Profile
     #
     # @return [String]
@@ -109,7 +111,7 @@ module PProf
       @plist['TeamName']
     end
 
-    # The list of X509 Developer Certifiates associated with this profile
+    # The list of X509 Developer Certificates associated with this profile
     #
     # @return [Array<OpenSSL::X509::Certificate>]
     def developer_certificates
@@ -152,14 +154,14 @@ module PProf
     #
     # @return [String]
     def to_s
-      lines = [:name, :uuid, :app_id_name, :app_id_prefix, :creation_date, :expiration_date, :ttl, :team_ids, :team_name].map do |key|
-        "- #{key.to_s}: #{self.send(key.to_sym)}"
+      lines = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].map do |key|
+        "- #{key}: #{send(key.to_sym)}"
       end +
-      [
-        "- #{developer_certificates.count} Developer Certificates",
-        "- #{provisioned_devices.count} Provisioned Devices",
-        "- Entitlements:"
-      ] + entitlements.to_hasg.map { |key, value| "   - #{key}: #{value}" }
+              [
+                "- #{developer_certificates.count} Developer Certificates",
+                "- #{provisioned_devices.count} Provisioned Devices",
+                '- Entitlements:'
+              ] + entitlements.to_hash.map { |key, value| "   - #{key}: #{value}" }
       lines.join("\n")
     end
   end

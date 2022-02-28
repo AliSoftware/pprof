@@ -1,0 +1,21 @@
+AllCops:
+  NewCops: enable
+
+# Metrics and Length Conventions
+
+Metrics/MethodLength:
+  Max: 30
+
+Layout/LineLength:
+  Max: 140
+
+# Complexity
+
+Metrics/AbcSize:
+  Max: 65
+
+Metrics/CyclomaticComplexity:
+  Max: 25
+
+Metrics/PerceivedComplexity:
+  Max: 25

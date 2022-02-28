@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Module for the pprof tool to manipulate Provisioning Profiles
 module PProf
   # Represents the list of entitlements in a Provisioning Profile
@@ -23,7 +25,7 @@ module PProf
     # True if we can attach a debugger to the executable, false if not.
     #
     # @return [Bool]
-    def get_task_allow
+    def get_task_allow # rubocop:disable Naming/AccessorMethodName
       @dict['get-task-allow']
     end
 
@@ -98,9 +100,10 @@ module PProf
     # @param [#to_s] key
     #        The key to check
     #
-    def has_key?(key)
-      @dict.has_key?(key.to_s)
+    def key?(key)
+      @dict.key?(key.to_s)
     end
+    alias has_key? key?
 
     # The list of all entitlement keys, as String
     #

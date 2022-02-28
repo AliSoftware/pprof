@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'pprof'
 require 'optparse'
@@ -7,7 +8,7 @@ require 'optparse'
 # Or a standard match if the string is bare.
 #
 def matcher(string)
-  m = string.match(%r[^/(.*)/(.*)$])
+  m = string.match(%r{^/(.*)/(.*)$})
   if m.nil?
     Regexp.new(Regexp.escape(string))
   else
@@ -19,10 +20,11 @@ end
 
 filters = {}
 options = {}
-list_options = { :mode => :table }
+list_options = { mode: :table }
 
+# rubocop:disable Metrics/BlockLength
 parser = OptionParser.new do |opts|
-  opts.banner = <<-BANNER.gsub(/^ *\|/,'')
+  opts.banner = <<-BANNER.gsub(/^ *\|/, '')
     |Usage:
     |  pprof [print_options] (PATH|UUID)
     |  pprof [list_options] [filters]
@@ -40,125 +42,124 @@ parser = OptionParser.new do |opts|
     |  - To remove all expired certificates, you can use `#{opts.program_name} -e0 | xargs -0 rm`
   BANNER
 
-  opts.separator ""
-  opts.separator "Print options (when file given)"
+  opts.separator ''
+  opts.separator 'Print options (when file given)'
 
-  opts.on("-i", "--info", "Print general info (default)") do
+  opts.on('-i', '--info', 'Print general info (default)') do
     options[:info] = true
   end
-  opts.on("-c", "--certs", "Print certificates") do
+  opts.on('-c', '--certs', 'Print certificates') do
     options[:certs] = true
   end
-  opts.on("-d", "--devices", "Print provisioned devices") do
+  opts.on('-d', '--devices', 'Print provisioned devices') do
     options[:devices] = true
   end
 
-  opts.separator ""
-  opts.separator "List options (when no file given)"
+  opts.separator ''
+  opts.separator 'List options (when no file given)'
 
-  opts.on("-l", "--list", "Print only the UUIDs, one per line (instead of an ASCII table)") do
+  opts.on('-l', '--list', 'Print only the UUIDs, one per line (instead of an ASCII table)') do
     list_options[:mode] = :list
   end
-  opts.on("-p", "--path", "Print only the paths, one per line (instead of an ASCII table)") do
+  opts.on('-p', '--path', 'Print only the paths, one per line (instead of an ASCII table)') do
     list_options[:mode] = :path
   end
-  opts.on("-0", "--print0", "Separate each found entry by \\0, to be used by `xargs -0`") do
+  opts.on('-0', '--print0', 'Separate each found entry by \\0, to be used by `xargs -0`') do
     list_options[:zero] = true
   end
 
-  opts.separator ""
-  opts.separator "Filters (when no file given)"
+  opts.separator ''
+  opts.separator 'Filters (when no file given)'
 
-  opts.on("--name NAME", "Filter by name") do |name|
+  opts.on('--name NAME', 'Filter by name') do |name|
     filters[:name] = matcher(name)
   end
 
-  opts.on("--appid-name APPID", "Filter by App ID Name") do |appid_name|
+  opts.on('--appid-name APPID', 'Filter by App ID Name') do |appid_name|
     filters[:appid_name] = matcher(appid_name)
   end
 
-  opts.on("--appid APPID", "Filter by App ID") do |appid|
+  opts.on('--appid APPID', 'Filter by App ID') do |appid|
     filters[:appid] = matcher(appid)
   end
 
-  opts.on("--uuid UUID", "Filter by UUID") do |uuid|
+  opts.on('--uuid UUID', 'Filter by UUID') do |uuid|
     filters[:uuid] = matcher(uuid)
   end
 
-  opts.on("--team TEAM", "Filter by team name or ID") do |team|
+  opts.on('--team TEAM', 'Filter by team name or ID') do |team|
     filters[:team] = matcher(team)
   end
 
-  opts.on("--[no-]exp", "Only profiles (not) expired") do |flag|
+  opts.on('--[no-]exp', 'Only profiles (not) expired') do |flag|
     filters[:exp] = flag
   end
 
-  opts.on("--[no-]has-devices", "Filter by profiles having (no) provisioned devices") do |d|
+  opts.on('--[no-]has-devices', 'Filter by profiles having (no) provisioned devices') do |d|
     filters[:has_devices] = d
   end
 
-  opts.on("--[no-]all-devices", "Filter by profiles (not) provisioning all devices") do |d|
+  opts.on('--[no-]all-devices', 'Filter by profiles (not) provisioning all devices') do |d|
     filters[:all_devices] = d
   end
 
-  opts.on("--aps [ENV]", "Only profiles having Push entitlements (or a specific aps env)") do |env|
+  opts.on('--aps [ENV]', 'Only profiles having Push entitlements (or a specific aps env)') do |env|
     filters[:aps_env] = env.nil? ? true : matcher(env)
   end
 
+  opts.separator ''
+  opts.separator 'Misc'
 
-  opts.separator ""
-  opts.separator "Misc"
-
-  opts.on_tail("-h", "--help", "Show this message") do
+  opts.on_tail('-h', '--help', 'Show this message') do
     puts opts
     exit
   end
 
-  opts.on_tail("-v", "--version", "Show version") do
+  opts.on_tail('-v', '--version', 'Show version') do
     puts PProf::VERSION
     exit
   end
 end
+# rubocop:enable Metrics/BlockLength
 
 # Parse the options, catching parse errors nicely
 begin
   parser.parse!
-rescue OptionParser::InvalidOption => err
-  puts err
-  puts parser.help()
+rescue OptionParser::InvalidOption => e
+  puts e
+  puts parser.help
   exit 1
 end
 
 # Don't mix filters and options together, that doesn't make sense
 
 unless filters.empty? || ARGV.empty?
-  puts "You should use either filter flags to filter the whole list, or an specific path, not both."
+  puts 'You should use either filter flags to filter the whole list, or an specific path, not both.'
   puts parser # Usage
   exit
 end
 
 unless options.empty? || !ARGV.empty?
-  puts "You should use option flags only when providing an specific path."
+  puts 'You should use option flags only when providing an specific path.'
   puts parser # Usage
   exit
 end
 
 # Call the appropriate action
 
+o = PProf::OutputFormatter.new
 if ARGV.empty?
   # Print list of matching profiles
-  o = PProf::OutputFormatter.new
   list_options[:mode] = :path if list_options[:zero] && list_options[:mode] == :table
   o.print_filtered_list(PProf::ProvisioningProfile::DEFAULT_DIR, filters, list_options)
 else
-  # Print info about given profile path/UUID
-  o = PProf::OutputFormatter.new
   begin
+    # Print info about given profile path/UUID
     p = PProf::ProvisioningProfile.new(ARGV[0])
-    
-    options = { :info => true } if options.empty?
+
+    options = { info: true } if options.empty?
     o.print_info(p, options)
-  rescue Exception => e
+  rescue StandardError => e
     o.print_error(e, ARGV[0])
   end
 end
