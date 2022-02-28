@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.files       = Dir['lib/**/*'] + Dir['bin/**/*'] + %w[README.md LICENSE]
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.7.0'
   s.executables << 'pprof'
 
   s.add_dependency 'plist', '~> 3.1'
