@@ -176,12 +176,16 @@ module PProf
     # @param [String] dir
     #        The directory containing the mobileprovision files to list.
     #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
+    # @param [Hash] options
+    #        The options hash typically filled while parsing the command line arguments.
+    #         - :mode: will print the UUIDs if set to `:uuid`, the file path otherwise
+    #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
     #
-    # @yield each provisioning provile for filtering/validation
+    # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options)
+    def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options) # rubocop:disable Style/OptionalArguments
       errors = []
       Dir[dir + '/*.mobileprovision'].each do |file|
         p = PProf::ProvisioningProfile.new(file)
