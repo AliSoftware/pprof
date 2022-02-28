@@ -109,7 +109,7 @@ module PProf
       @plist['TeamName']
     end
 
-    # The list of X509 Developer Certifiates associated with this profile
+    # The list of X509 Developer Certificates associated with this profile
     #
     # @return [Array<OpenSSL::X509::Certificate>]
     def developer_certificates
@@ -159,7 +159,7 @@ module PProf
         "- #{developer_certificates.count} Developer Certificates",
         "- #{provisioned_devices.count} Provisioned Devices",
         "- Entitlements:"
-      ] + entitlements.to_hasg.map { |key, value| "   - #{key}: #{value}" }
+      ] + entitlements.to_hash.map { |key, value| "   - #{key}: #{value}" }
       lines.join("\n")
     end
   end

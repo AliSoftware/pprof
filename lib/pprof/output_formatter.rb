@@ -69,7 +69,14 @@ module PProf
 
       if options[:info] || options[:certs] 
         @output.puts "- #{profile.developer_certificates.count} Developer Certificates"
-        profile.developer_certificates.each { |cert| @output.puts "   - #{cert.subject}" } if options[:certs]
+        if options[:certs]
+            profile.developer_certificates.each do |cert|
+              @output.puts "   - #{cert.subject}"
+              @output.puts "     issuer: #{cert.issuer}"
+              @output.puts "     serial: #{cert.serial}"
+              @output.puts "     expires: #{cert.not_after}"
+            end
+        end
       end
       if options[:info] || options[:devices]
         @output.puts "- #{(profile.provisioned_devices || []).count} Provisioned Devices"
