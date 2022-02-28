@@ -22,6 +22,7 @@ filters = {}
 options = {}
 list_options = { mode: :table }
 
+# rubocop:disable Metrics/BlockLength
 parser = OptionParser.new do |opts|
   opts.banner = <<-BANNER.gsub(/^ *\|/, '')
     |Usage:
@@ -119,6 +120,7 @@ parser = OptionParser.new do |opts|
     exit
   end
 end
+# rubocop:enable Metrics/BlockLength
 
 # Parse the options, catching parse errors nicely
 begin

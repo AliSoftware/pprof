@@ -17,4 +17,6 @@ Gem::Specification.new do |s|
   s.executables << 'pprof'
 
   s.add_dependency 'plist', '~> 3.1'
+
+  s.metadata['rubygems_mfa_required'] = 'true'
 end
