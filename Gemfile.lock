@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pprof (0.3.9)
+    pprof (0.4.1)
       plist (~> 3.1)
 
 GEM
