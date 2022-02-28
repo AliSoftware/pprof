@@ -67,7 +67,7 @@ module PProf
           @output.puts "- #{key}: #{profile.send(key.to_sym)}"
         end
         @output.puts '- Entitlements:'
-        @output.puts profile.entitlements.to_s.split("\n").map { |line| "   #{line}" }
+        @output.puts(profile.entitlements.to_s.split("\n").map { |line| "   #{line}" })
       end
 
       if options[:info] || options[:certs]
