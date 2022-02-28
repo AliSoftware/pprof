@@ -156,7 +156,7 @@ module PProf
 
           state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
           @output.puts table.row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
-        rescue Exception => e
+        rescue StandardError => e
           errors << { message: e, file: file }
         end
         count += 1
@@ -186,7 +186,7 @@ module PProf
 
         @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
         @output.print options[:zero] ? "\0" : "\n"
-      rescue Exception => e
+      rescue StandardError => e
         errors << { message: e, file: file }
       end
       errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?

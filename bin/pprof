@@ -158,7 +158,7 @@ else
 
     options = { info: true } if options.empty?
     o.print_info(p, options)
-  rescue Exception => e
+  rescue StandardError => e
     o.print_error(e, ARGV[0])
   end
 end
