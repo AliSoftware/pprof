@@ -100,9 +100,10 @@ module PProf
     # @param [#to_s] key
     #        The key to check
     #
-    def has_key?(key)
-      @dict.has_key?(key.to_s)
+    def key?(key)
+      @dict.key?(key.to_s)
     end
+    alias has_key? key?
 
     # The list of all entitlement keys, as String
     #

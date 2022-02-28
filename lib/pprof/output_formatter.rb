@@ -70,6 +70,7 @@ module PProf
         @output.puts(profile.entitlements.to_s.split("\n").map { |line| "   #{line}" })
       end
 
+      # rubocop:disable Style/GuardClause
       if options[:info] || options[:certs]
         @output.puts "- #{profile.developer_certificates.count} Developer Certificates"
         if options[:certs]
@@ -81,11 +82,13 @@ module PProf
           end
         end
       end
+
       if options[:info] || options[:devices]
         @output.puts "- #{(profile.provisioned_devices || []).count} Provisioned Devices"
         profile.provisioned_devices.each { |udid| @output.puts "   - #{udid}" } if options[:devices]
         @output.puts "- Provision all devices: #{profile.provisions_all_devices.inspect}"
       end
+      # rubocop:enable Style/GuardClause
     end
 
     # Prints the filtered list of Provisioning Profiles
@@ -193,8 +196,8 @@ module PProf
     end
 
     def self.match_aps_env(actual, expected)
-      return false if actual.nil?      # false if no Push entitlements
-      return true if expected === true # true if Push present but we don't filter on specific env
+      return false if actual.nil? # false if no Push entitlements
+      return true if expected == true # true if Push present but we don't filter on specific env
 
       actual =~ expected        # true if Push present and we filter on specific env
     end
