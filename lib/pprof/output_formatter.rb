@@ -29,14 +29,16 @@ module PProf
       # @param [String...] cols
       #        The content of each column of the row to add
       def row(*cols)
-        '| ' + cols.zip(@widths).map do |c, w|
+        justified_cols = cols.zip(@widths).map do |c, w|
           (c || '<nil>').to_s.ljust(w)[0...w]
-        end.join(' | ') + ' |'
+        end
+        "| #{justified_cols.join(' | ')} |"
       end
 
       # Add a separator line to the ASCII table
       def separator
-        '+' + @widths.map { |w| '-' * (w + 2) }.join('+') + '+'
+        columns_dashes = @widths.map { |w| '-' * (w + 2) }
+        "+#{columns_dashes.join('+')}+"
       end
     end
 
