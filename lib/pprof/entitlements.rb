@@ -25,7 +25,7 @@ module PProf
     # True if we can attach a debugger to the executable, false if not.
     #
     # @return [Bool]
-    def get_task_allow
+    def get_task_allow # rubocop:disable Naming/AccessorMethodName
       @dict['get-task-allow']
     end
 
