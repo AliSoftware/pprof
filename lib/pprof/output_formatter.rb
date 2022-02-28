@@ -27,14 +27,14 @@ module PProf
       # @param [String...] cols
       #        The content of each column of the row to add
       def row(*cols)
-        '| ' + cols.zip(@widths).map do |c,w|
+        '| ' + cols.zip(@widths).map do |c, w|
           (c || '<nil>').to_s.ljust(w)[0...w]
         end.join(' | ') + ' |'
       end
 
       # Add a separator line to the ASCII table
       def separator
-        '+' + @widths.map { |w| '-' * (w+2) }.join('+') + '+' 
+        '+' + @widths.map { |w| '-' * (w + 2) }.join('+') + '+'
       end
     end
 
@@ -57,25 +57,26 @@ module PProf
     #        Decide what to print. Valid keys are :info, :certs and :devices
     #
     def print_info(profile, options = nil)
-      options ||= { :info => true }
+      options ||= { info: true }
       if options[:info]
-        keys = [:name, :uuid, :app_id_name, :app_id_prefix, :creation_date, :expiration_date, :ttl, :team_ids, :team_name]
+        keys = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids
+                  team_name]
         keys.each do |key|
-          @output.puts "- #{key.to_s}: #{profile.send(key.to_sym)}"
+          @output.puts "- #{key}: #{profile.send(key.to_sym)}"
         end
-        @output.puts "- Entitlements:"
+        @output.puts '- Entitlements:'
         @output.puts profile.entitlements.to_s.split("\n").map { |line| "   #{line}" }
       end
 
-      if options[:info] || options[:certs] 
+      if options[:info] || options[:certs]
         @output.puts "- #{profile.developer_certificates.count} Developer Certificates"
         if options[:certs]
-            profile.developer_certificates.each do |cert|
-              @output.puts "   - #{cert.subject}"
-              @output.puts "     issuer: #{cert.issuer}"
-              @output.puts "     serial: #{cert.serial}"
-              @output.puts "     expires: #{cert.not_after}"
-            end
+          profile.developer_certificates.each do |cert|
+            @output.puts "   - #{cert.subject}"
+            @output.puts "     issuer: #{cert.issuer}"
+            @output.puts "     serial: #{cert.serial}"
+            @output.puts "     expires: #{cert.not_after}"
+          end
         end
       end
       if options[:info] || options[:devices]
@@ -104,18 +105,18 @@ module PProf
     #        * Valid values for key `:zero` are `true` or `false` to decide if we print `\0` at the end of each output.
     #          Only used by `:list` and `:path` modes
     #
-    def print_filtered_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, filters = {}, list_options = { :mode => :table })
+    def print_filtered_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, filters = {}, list_options = { mode: :table })
       filter_func = lambda do |p|
         (filters[:name].nil? || p.name =~ filters[:name]) &&
-        (filters[:appid_name].nil? || p.app_id_name =~ filters[:appid_name]) &&
-        (filters[:appid].nil? || p.entitlements.app_id =~ filters[:appid]) &&
-        (filters[:uuid].nil? || p.uuid =~ filters[:uuid]) &&
-        (filters[:team].nil? || p.team_name =~ filters[:team] || p.team_ids.any? { |id| id =~ filters[:team] }) &&
-        (filters[:exp].nil? || (p.expiration_date < DateTime.now) == filters[:exp]) &&
-        (filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]) &&
-        (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
-        (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
-        true
+          (filters[:appid_name].nil? || p.app_id_name =~ filters[:appid_name]) &&
+          (filters[:appid].nil? || p.entitlements.app_id =~ filters[:appid]) &&
+          (filters[:uuid].nil? || p.uuid =~ filters[:uuid]) &&
+          (filters[:team].nil? || p.team_name =~ filters[:team] || p.team_ids.any? { |id| id =~ filters[:team] }) &&
+          (filters[:exp].nil? || (p.expiration_date < DateTime.now) == filters[:exp]) &&
+          (filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]) &&
+          (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
+          (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
+          true
       end
 
       case list_options[:mode]
@@ -148,13 +149,13 @@ module PProf
       Dir[dir + '/*.mobileprovision'].each do |file|
         begin
           p = PProf::ProvisioningProfile.new(file)
-        
+
           next if block_given? && !yield(p)
 
           state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
           @output.puts table.row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
         rescue Exception => e
-          errors << { :message => e, :file => file }
+          errors << { message: e, file: file }
         end
         count += 1
       end
@@ -162,9 +163,7 @@ module PProf
       @output.puts table.separator
       @output.puts "#{count} Provisioning Profiles found."
 
-      unless errors.empty?
-        errors.each { |e| print_error(e[:message], e[:file]) }
-      end
+      errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?
     end
 
     # Prints the filtered list of UUIDs or Paths only
@@ -180,27 +179,22 @@ module PProf
     def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options)
       errors = []
       Dir[dir + '/*.mobileprovision'].each do |file|
-        begin
-          p = PProf::ProvisioningProfile.new(file)
-          next if block_given? && !yield(p)
+        p = PProf::ProvisioningProfile.new(file)
+        next if block_given? && !yield(p)
 
-          @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
-          @output.print options[:zero] ? "\0" : "\n"
-        rescue Exception => e
-          errors << { :message => e, :file => file }
-        end
+        @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
+        @output.print options[:zero] ? "\0" : "\n"
+      rescue Exception => e
+        errors << { message: e, file: file }
       end
-      unless errors.empty?
-        errors.each { |e| print_error(e[:message], e[:file]) }
-      end
+      errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?
     end
 
-
-    private
     def self.match_aps_env(actual, expected)
       return false if actual.nil?      # false if no Push entitlements
       return true if expected === true # true if Push present but we don't filter on specific env
-      return actual =~ expected        # true if Push present and we filter on specific env
+
+      actual =~ expected        # true if Push present and we filter on specific env
     end
   end
 end
