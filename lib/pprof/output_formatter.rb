@@ -153,7 +153,8 @@ module PProf
       @output.puts table.row('UUID', 'Name', 'AppID', 'Expiration Date', ' ', 'Team Name')
       @output.puts table.separator
 
-      Dir[dir + '/*.mobileprovision'].each do |file|
+      Dir['*.mobileprovision', base: dir].each do |file_name|
+        file = File.join(dir, file_name)
         begin
           p = PProf::ProvisioningProfile.new(file)
 
@@ -189,7 +190,8 @@ module PProf
     #
     def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options) # rubocop:disable Style/OptionalArguments
       errors = []
-      Dir[dir + '/*.mobileprovision'].each do |file|
+      Dir['*.mobileprovision', base: dir].each do |file_name|
+        file = File.join(dir, file_name)
         p = PProf::ProvisioningProfile.new(file)
         next if block_given? && !yield(p)
 
