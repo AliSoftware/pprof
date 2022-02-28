@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Module for the pprof tool to manipulate Provisioning Profiles
 module PProf
   # Represents the list of entitlements in a Provisioning Profile
