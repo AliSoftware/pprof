@@ -146,7 +146,7 @@ module PProf
     #
     # @return [Hash]
     def to_hash
-      @dict
+      @plist
     end
 
     # The human-readable string representation of this Provisioning Profile

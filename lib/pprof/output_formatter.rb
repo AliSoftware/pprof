@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
+require 'json'
+
 # Module for the pprof tool to manipulate Provisioning Profiles
 module PProf
   # A helper tool to pretty-print Provisioning Profile informations
   class OutputFormatter
+    # List of properties of a `PProf::ProvisioningProfile` to print when using the `-i` flag
+    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name]
+
     # Initialize a new OutputFormatter
     #
     # @param [IO] output
@@ -63,8 +68,7 @@ module PProf
     def print_info(profile, options = nil)
       options ||= { info: true }
       if options[:info]
-        keys = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids
-                  team_name]
+        keys = MAIN_PROFILE_KEYS
         keys.each do |key|
           @output.puts "- #{key}: #{profile.send(key.to_sym)}"
         end
@@ -91,6 +95,49 @@ module PProf
         @output.puts "- Provision all devices: #{profile.provisions_all_devices.inspect}"
       end
       # rubocop:enable Style/GuardClause
+    end
+
+    # Returns a Provisioning Profile hash ready to be printed as a JSON output
+    #
+    # @param [Array<PProf::ProvisioningProfile>] profile
+    #        List of provisioning profiles to include in the JSON output
+    # @param [Hash] options
+    #        Options to indicate what to include in the generated JSON.
+    #        `:certs`: if set to `true`, output will also include the info about `DeveloperCertificates` in each profile
+    #        `:devices`: if set to `true`, output will also include the list of `ProvisionedDevices` for each profile
+    #
+    # @return [Hash] The hash ready to be `JSON.pretty_generate`'d
+    #
+    def as_json(profile, options = {})
+      hash = profile.to_hash.dup
+      hash.delete 'DER-Encoded-Profile'
+      hash.delete 'ProvisionedDevices' unless options[:devices]
+      if options[:certs]
+        hash['DeveloperCertificates'] = developer_certificates.map do |cert|
+          {
+            subject: cert.subject,
+            issuer: cert.issuer,
+            serial: cert.serial,
+            expires: cert.not_after
+          }
+        end
+      else
+        hash.delete 'DeveloperCertificates'
+      end
+      hash
+    end
+
+    # Prints a Provisioning Profile as JSON
+    #
+    # @param [Array<PProf::ProvisioningProfile>] profile
+    #        List of provisioning profiles to include in the JSON output
+    # @param [Hash] options
+    #        Options to indicate what to include in the generated JSON.
+    #        `:certs`: if set to `true`, output will also include the info about `DeveloperCertificates` in each profile
+    #        `:devices`: if set to `true`, output will also include the list of `ProvisionedDevices` for each profile
+    #
+    def print_json(profile, options = {})
+      @output.puts JSON.pretty_generate(as_json(profile, options))
     end
 
     # Prints the filtered list of Provisioning Profiles
@@ -129,6 +176,8 @@ module PProf
       case list_options[:mode]
       when :table
         print_table(dir, &filter_func)
+      when :json
+        print_json_list(dir, list_options, &filter_func)
       else
         print_list(dir, list_options, &filter_func)
       end
@@ -201,6 +250,33 @@ module PProf
         errors << { message: e, file: file }
       end
       errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?
+    end
+
+    # Prints the filtered list of profiles as a JSON array
+    #
+    # @param [String] dir
+    #        The directory containing the mobileprovision files to list.
+    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
+    # @param [Hash] options
+    #        The options hash typically filled while parsing the command line arguments.
+    #         - :mode: will print the UUIDs if set to `:list`, the file path otherwise
+    #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
+    #
+    # @yield each provisioning profile for filtering/validation
+    #        The block is given ProvisioningProfile object and should
+    #        return true to display the row, false to filter it out
+    #
+    def print_json_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options) # rubocop:disable Style/OptionalArguments
+      errors = []
+      profiles = Dir['*.mobileprovision', base: dir].map do |file_name|
+        file = File.join(dir, file_name)
+        p = PProf::ProvisioningProfile.new(file)
+        as_json(p, options) unless block_given? && !yield(p)
+      rescue StandardError => e
+        errors << { message: e, file: file }
+      end.compact
+      errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?
+      @output.puts JSON.pretty_generate(profiles)
     end
 
     def self.match_aps_env(actual, expected)

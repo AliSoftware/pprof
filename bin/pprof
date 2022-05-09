@@ -64,6 +64,9 @@ parser = OptionParser.new do |opts|
   opts.on('-p', '--path', 'Print only the paths, one per line (instead of an ASCII table)') do
     list_options[:mode] = :path
   end
+  opts.on('-j', '--json', 'Print the output information as a JSON') do
+    list_options[:mode] = :json
+  end
   opts.on('-0', '--print0', 'Separate each found entry by \\0, to be used by `xargs -0`') do
     list_options[:zero] = true
   end
@@ -156,9 +159,12 @@ else
   begin
     # Print info about given profile path/UUID
     p = PProf::ProvisioningProfile.new(ARGV[0])
-
     options = { info: true } if options.empty?
-    o.print_info(p, options)
+    if list_options[:mode] == :json
+      o.print_json(p, options)
+    else
+      o.print_info(p, options)
+    end
   rescue StandardError => e
     o.print_error(e, ARGV[0])
   end
