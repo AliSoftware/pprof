@@ -113,7 +113,7 @@ module PProf
       hash.delete 'DER-Encoded-Profile'
       hash.delete 'ProvisionedDevices' unless options[:devices]
       if options[:certs]
-        hash['DeveloperCertificates'] = developer_certificates.map do |cert|
+        hash['DeveloperCertificates'] = profile.developer_certificates.map do |cert|
           {
             subject: cert.subject,
             issuer: cert.issuer,
@@ -177,7 +177,7 @@ module PProf
       when :table
         print_table(dir, &filter_func)
       when :json
-        print_json_list(dir, list_options, &filter_func)
+        print_json_list(dir, list_options[:json_options], &filter_func)
       else
         print_list(dir, list_options, &filter_func)
       end

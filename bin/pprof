@@ -142,7 +142,7 @@ unless filters.empty? || ARGV.empty?
   exit
 end
 
-unless options.empty? || !ARGV.empty?
+unless list_options[:mode] == :json || options.empty? || !ARGV.empty?
   puts 'You should use option flags only when providing an specific path.'
   puts parser # Usage
   exit
@@ -154,6 +154,7 @@ o = PProf::OutputFormatter.new
 if ARGV.empty?
   # Print list of matching profiles
   list_options[:mode] = :path if list_options[:zero] && list_options[:mode] == :table
+  list_options[:json_options] = options # Allow `-c` and `-d` options to be passed along when using JSON output
   o.print_filtered_list(PProf::ProvisioningProfile::DEFAULT_DIR, filters, list_options)
 else
   begin
