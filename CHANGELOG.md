@@ -2,10 +2,18 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.5.1
+
+* Fix an issue with `-j`/`--json` when used with list mode, so that it can now take `-c` and `-d` flags into account to include (or not) the certificates and devices in the JSON output list mode.
+
 ## 0.5.0
 
 * Add support for printing the output and profiles info as JSON using `-j`/`--json`.
 * Fix an issue with `-l`/`--list` which were printing the path instead of the UUID.
+
+## 0.4.1
+
+* Lower the minimum ruby version required for the gem (was accidentally bumped in previous version, while we don't strictly really require a higher one for the gem to work)
 
 ## 0.4.0
 

@@ -40,6 +40,8 @@ parser = OptionParser.new do |opts|
     |Tips:
     |  - If you want to search for _exact_ match, you can use and anchored RegEx like `/^InHouse$/i`
     |  - To remove all expired certificates, you can use `#{opts.program_name} -e0 | xargs -0 rm`
+    |  - You can combine the `--json` output with `jq` to generate and filter using some powerful custom outputs.
+    |    e.g.: `#{opts.program_name} --name 'My App' --json --devices | jq '.[] | {uuid:.UUID, name:.AppIDName, nb_profiles: .ProvisionedDevices|length}'`
   BANNER
 
   opts.separator ''
