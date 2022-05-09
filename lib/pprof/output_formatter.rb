@@ -140,27 +140,14 @@ module PProf
       @output.puts JSON.pretty_generate(as_json(profile, options))
     end
 
-    # Prints the filtered list of Provisioning Profiles
-    #
-    # Convenience method. Calls self.print_list with a filter block build from a filter hash
-    #
-    # @param [String] dir
-    #        The directory to search for the provisioning profiles. Defaults to the standard directory on Mac
+    # Generates a lambda which takes a `PProf::ProvisioningProfile` and returns if it should be kept in our listing or not
     #
     # @param [Hash<Symbol,Any>] filters
     #        The hash describing the applied filters
+    # @return [Lambda] A lambda which takes a `PProf::ProvisioningProfile` and returns `true` if it matches the provided `filters`
     #
-    # @param [Hash<Symbol,Any>] list_options
-    #        The way to print the output.
-    #        * Valid values for key `:mode` are:
-    #          - `:table` (for ASCII table output)
-    #          - `:list` (for plain list of only the UUIDs, suitable for piping to `xargs`)
-    #          - `:path` (for plain list of only the paths, suitable for piping to `xargs`)
-    #        * Valid values for key `:zero` are `true` or `false` to decide if we print `\0` at the end of each output.
-    #          Only used by `:list` and `:path` modes
-    #
-    def print_filtered_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, filters = {}, list_options = { mode: :table })
-      filter_func = lambda do |p|
+    def filter_proc(filters = {})
+      lambda do |p|
         (filters[:name].nil? || p.name =~ filters[:name]) &&
           (filters[:appid_name].nil? || p.app_id_name =~ filters[:appid_name]) &&
           (filters[:appid].nil? || p.entitlements.app_id =~ filters[:appid]) &&
@@ -171,15 +158,6 @@ module PProf
           (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
           (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
           true
-      end
-
-      case list_options[:mode]
-      when :table
-        print_table(dir, &filter_func)
-      when :json
-        print_json_list(dir, list_options[:json_options], &filter_func)
-      else
-        print_list(dir, list_options, &filter_func)
       end
     end
 
@@ -193,7 +171,7 @@ module PProf
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_table(dir = PProf::ProvisioningProfile::DEFAULT_DIR)
+    def print_table(dir: PProf::ProvisioningProfile::DEFAULT_DIR)
       count = 0
       errors = []
 
@@ -237,7 +215,7 @@ module PProf
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options) # rubocop:disable Style/OptionalArguments
+    def print_list(dir: PProf::ProvisioningProfile::DEFAULT_DIR, options:) # rubocop:disable Style/OptionalArguments
       errors = []
       Dir['*.mobileprovision', base: dir].each do |file_name|
         file = File.join(dir, file_name)
@@ -259,14 +237,14 @@ module PProf
     #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     # @param [Hash] options
     #        The options hash typically filled while parsing the command line arguments.
-    #         - :mode: will print the UUIDs if set to `:list`, the file path otherwise
-    #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
+    #         - :certs: will print the UUIDs if set to `:list`, the file path otherwise
+    #         - :devices: will concatenate the entries with `\0` instead of `\n` if set
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_json_list(dir = PProf::ProvisioningProfile::DEFAULT_DIR, options) # rubocop:disable Style/OptionalArguments
+    def print_json_list(dir: PProf::ProvisioningProfile::DEFAULT_DIR, options:) # rubocop:disable Style/OptionalArguments
       errors = []
       profiles = Dir['*.mobileprovision', base: dir].map do |file_name|
         file = File.join(dir, file_name)
