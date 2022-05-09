@@ -32,6 +32,8 @@ _(You might need to run this command with `sudo` if your gem home is a system di
 
 ### Using it from the command line
 
+#### Listing (and filtering) provisioning profiles
+
 ```sh
 # List all provisioning profiles
 $ pprof 
@@ -65,6 +67,8 @@ $ pprof --has-devices --aps --appid com.foo
 $ pprof --exp -0 | xargs -0 rm
 ```
 
+#### Printing info for a given Provisioning Profile
+
 ```sh
 # Print info for a given Provisioning Profile
 $ pprof '12345678-ABCD-EF90-1234-567890ABCDEF'
@@ -78,6 +82,25 @@ $ pprof --devices '12345678-ABCD-EF90-1234-567890ABCDEF'
 # Print all info on a given PP
 $ pprof --certs --devices --info '12345678-ABCD-EF90-1234-567890ABCDEF'
 $ pprof -cdi '12345678-ABCD-EF90-1234-567890ABCDEF'
+```
+
+#### Printing output in JSON
+
+```sh
+# Print info about all your provisioning profiles as a JSON array
+$ pprof --json
+# Print info about all your provisioning profiles whose name contains "Foo", as a JSON array
+$ pprof --name "Foo" --json
+# Print info about all your provisioning profiles as a JSON array, including list of devices and certificates in each profile
+$ pprof --json --devices --certs
+
+# Print info about a specific provisioning profile as JSON object
+$ pprof --json '12345678-ABCD-EF90-1234-567890ABCDEF'
+# Print info about a specific provisioning profile as JSON object, including list of devices and certificates
+$ pprof --json -c -d '12345678-ABCD-EF90-1234-567890ABCDEF'
+
+# Use `jq` (https://stedolan.github.io/jq/) to post-process the JSON output and generate some custom JSON array of objects from it
+$ pprof --name 'My App' --json --devices | jq '.[] | {uuid:.UUID, name:.AppIDName, nb_profiles: .ProvisionedDevices|length}'
 ```
 
 ### Using it in Ruby
