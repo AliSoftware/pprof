@@ -181,7 +181,7 @@ module PProf
     #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     # @param [Hash] options
     #        The options hash typically filled while parsing the command line arguments.
-    #         - :mode: will print the UUIDs if set to `:uuid`, the file path otherwise
+    #         - :mode: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
     #
     # @yield each provisioning profile for filtering/validation
@@ -195,7 +195,7 @@ module PProf
         p = PProf::ProvisioningProfile.new(file)
         next if block_given? && !yield(p)
 
-        @output.print options[:mode] == :uuid ? p.uuid.chomp : file.chomp
+        @output.print options[:mode] == :list ? p.uuid.chomp : file.chomp
         @output.print options[:zero] ? "\0" : "\n"
       rescue StandardError => e
         errors << { message: e, file: file }
