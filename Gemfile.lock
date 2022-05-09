@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pprof (0.4.1)
+    pprof (0.5.0)
       plist (~> 3.1)
 
 GEM
@@ -37,4 +37,4 @@ DEPENDENCIES
   rubocop (~> 1.25)
 
 BUNDLED WITH
-   2.2.33
+   2.3.13

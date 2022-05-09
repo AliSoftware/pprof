@@ -2,6 +2,11 @@
 
 This file lists the changes for various versions of the `pprof` gem.
 
+## 0.5.0
+
+* Add support for printing the output and profiles info as JSON using `-j`/`--json`.
+* Fix an issue with `-l`/`--list` which were printing the path instead of the UUID.
+
 ## 0.4.0
 
 * Make the output of `-c` (printing certificates in a provisioning profile) more verbose,
