@@ -6,7 +6,9 @@
 
 `pprof` is a ruby library and binary to manipulate Provisioning Profiles.
 
-It can help you create ruby scripts to list, get information, find and filter local Provisioning Profiles easily.
+It can help you manage the Provisioning Profiles installed on your Mac (find the profiles UUIDs from the app names or bundle IDs, find detailed information on a given profile, clean up expired profiles from your Mac…) directly from the command line.
+
+It also supports printing the output in JSON format so you can pipe the result of printing provisioning profiles info into `jq` or similar tools.
 
 ## Installation
 
