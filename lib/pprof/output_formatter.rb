@@ -7,7 +7,7 @@ module PProf
   # A helper tool to pretty-print Provisioning Profile informations
   class OutputFormatter
     # List of properties of a `PProf::ProvisioningProfile` to print when using the `-i` flag
-    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name]
+    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].freeze
 
     # Initialize a new OutputFormatter
     #
@@ -203,19 +203,19 @@ module PProf
 
     # Prints the filtered list of UUIDs or Paths only
     #
-    # @param [String] dir
-    #        The directory containing the mobileprovision/provisionprofile files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     # @param [Hash] options
     #        The options hash typically filled while parsing the command line arguments.
     #         - :mode: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
+    # @param [String] dir
+    #        The directory containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_list(dir: PProf::ProvisioningProfile::DEFAULT_DIR, options:) # rubocop:disable Style/OptionalArguments
+    def print_list(options:, dir: PProf::ProvisioningProfile::DEFAULT_DIR)
       errors = []
       Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
         file = File.join(dir, file_name)
@@ -232,19 +232,19 @@ module PProf
 
     # Prints the filtered list of profiles as a JSON array
     #
-    # @param [String] dir
-    #        The directory containing the mobileprovision/provisionprofile files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     # @param [Hash] options
     #        The options hash typically filled while parsing the command line arguments.
     #         - :certs: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :devices: will concatenate the entries with `\0` instead of `\n` if set
+    # @param [String] dir
+    #        The directory containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_json_list(dir: PProf::ProvisioningProfile::DEFAULT_DIR, options:) # rubocop:disable Style/OptionalArguments
+    def print_json_list(options:, dir: PProf::ProvisioningProfile::DEFAULT_DIR)
       errors = []
       profiles = Dir['*.{mobileprovision,provisionprofile}', base: dir].map do |file_name|
         file = File.join(dir, file_name)

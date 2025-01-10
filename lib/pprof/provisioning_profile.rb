@@ -21,7 +21,7 @@ module PProf
     #        File path or UUID of the ProvisioningProfile
     #
     def initialize(file)
-      path = if file.match? /^[0-9A-F-]*$/i
+      path = if file.match?(/^[0-9A-F-]*$/i)
                Dir["#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.{mobileprovision,provisionprofile}"].first
              else
                file
