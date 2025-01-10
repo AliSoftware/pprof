@@ -5,6 +5,7 @@ This file lists the changes for various versions of the `pprof` gem.
 ## 1.0.0
 
 * Add support Mac Profiles (`*.provisionprofile`) alongside the already-supported iOS Profiles (`*.mobileprovision`).
+* Add `--platform` filter to only list profiles that support a given platform (`OSX`, `iOS`, …)
 
 ## 0.5.1
 

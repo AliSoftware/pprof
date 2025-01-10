@@ -157,6 +157,7 @@ module PProf
           (filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]) &&
           (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
           (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
+          (filters[:platform].nil? || p.platform.include?(filters[:platform])) &&
           true
       end
     end

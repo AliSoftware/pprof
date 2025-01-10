@@ -88,6 +88,10 @@ parser = OptionParser.new do |opts|
     filters[:appid] = matcher(appid)
   end
 
+  opts.on('--platform PLATFORM', 'Filter by Platform (OSX, iOS, xrOS/visionOS, …)') do |platform|
+    filters[:platform] = platform
+  end
+
   opts.on('--uuid UUID', 'Filter by UUID') do |uuid|
     filters[:uuid] = matcher(uuid)
   end

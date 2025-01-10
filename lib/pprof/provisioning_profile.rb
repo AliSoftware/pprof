@@ -60,6 +60,14 @@ module PProf
       @plist['UUID']
     end
 
+    # The list of Platforms the Provisioning Profile is for.
+    # Typical values include `OSX`, `iOS`, `xrOS`, `visionOS`, …
+    #
+    # @return [Array<String>]
+    def platform
+      @plist['Platform']
+    end
+
     # The name of the Application Identifier associated with this Provisioning Profile
     #
     # @note This is not the AppID itself, but rather the name you associated to that
