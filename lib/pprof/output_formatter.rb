@@ -7,7 +7,7 @@ module PProf
   # A helper tool to pretty-print Provisioning Profile informations
   class OutputFormatter
     # List of properties of a `PProf::ProvisioningProfile` to print when using the `-i` flag
-    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name]
+    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].freeze
 
     # Initialize a new OutputFormatter
     #
@@ -157,6 +157,7 @@ module PProf
           (filters[:has_devices].nil? || !(p.provisioned_devices || []).empty? == filters[:has_devices]) &&
           (filters[:all_devices].nil? || p.provisions_all_devices == filters[:all_devices]) &&
           (filters[:aps_env].nil? || match_aps_env(p.entitlements.aps_environment, filters[:aps_env])) &&
+          (filters[:platform].nil? || p.platform.include?(filters[:platform])) &&
           true
       end
     end
@@ -164,7 +165,7 @@ module PProf
     # Prints the filtered list as a table
     #
     # @param [String] dir
-    #        The directory containing the mobileprovision files to list.
+    #        The directory containing the mobileprovision/provisionprofile files to list.
     #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     #
     # @yield each provisioning provile for filtering/validation
@@ -180,7 +181,7 @@ module PProf
       @output.puts table.row('UUID', 'Name', 'AppID', 'Expiration Date', ' ', 'Team Name')
       @output.puts table.separator
 
-      Dir['*.mobileprovision', base: dir].each do |file_name|
+      Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
         file = File.join(dir, file_name)
         begin
           p = PProf::ProvisioningProfile.new(file)
@@ -203,21 +204,21 @@ module PProf
 
     # Prints the filtered list of UUIDs or Paths only
     #
-    # @param [String] dir
-    #        The directory containing the mobileprovision files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     # @param [Hash] options
     #        The options hash typically filled while parsing the command line arguments.
     #         - :mode: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
+    # @param [String] dir
+    #        The directory containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_list(dir: PProf::ProvisioningProfile::DEFAULT_DIR, options:) # rubocop:disable Style/OptionalArguments
+    def print_list(options:, dir: PProf::ProvisioningProfile::DEFAULT_DIR)
       errors = []
-      Dir['*.mobileprovision', base: dir].each do |file_name|
+      Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
         file = File.join(dir, file_name)
         p = PProf::ProvisioningProfile.new(file)
         next if block_given? && !yield(p)
@@ -232,21 +233,21 @@ module PProf
 
     # Prints the filtered list of profiles as a JSON array
     #
-    # @param [String] dir
-    #        The directory containing the mobileprovision files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     # @param [Hash] options
     #        The options hash typically filled while parsing the command line arguments.
     #         - :certs: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :devices: will concatenate the entries with `\0` instead of `\n` if set
+    # @param [String] dir
+    #        The directory containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_json_list(dir: PProf::ProvisioningProfile::DEFAULT_DIR, options:) # rubocop:disable Style/OptionalArguments
+    def print_json_list(options:, dir: PProf::ProvisioningProfile::DEFAULT_DIR)
       errors = []
-      profiles = Dir['*.mobileprovision', base: dir].map do |file_name|
+      profiles = Dir['*.{mobileprovision,provisionprofile}', base: dir].map do |file_name|
         file = File.join(dir, file_name)
         p = PProf::ProvisioningProfile.new(file)
         as_json(p, options) unless block_given? && !yield(p)

@@ -130,7 +130,8 @@ end
 
 # And you can easily loop on all provisioning profiles and manipulate each
 dir = PProf::ProvisioningProfile::DEFAULT_DIR
-Dir["#{dir}/*.mobileprovision"].each do |file|
+# `*.mobileprovision` are typically for iOS profiles, `*.provisionprofile` for Mac profiles
+Dir["#{dir}/*.{mobileprovision,provisionprofile}"].each do |file|
   p = PProf::ProvisioningProfile.new(file)
   puts p.name
 end

@@ -3,6 +3,9 @@ AllCops:
 
 # Metrics and Length Conventions
 
+Metrics/ClassLength:
+  Max: 150
+
 Metrics/MethodLength:
   Max: 30
 
