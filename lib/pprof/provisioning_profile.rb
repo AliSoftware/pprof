@@ -21,11 +21,13 @@ module PProf
     #        File path or UUID of the ProvisioningProfile
     #
     def initialize(file)
-      path = if file =~ /^[0-9A-F-]*$/i
-               "#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.mobileprovision"
+      path = if file.match? /^[0-9A-F-]*$/i
+               Dir["#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.{mobileprovision,provisionprofile}"].first
              else
                file
              end
+      raise "Unable to find Provisioning Profile with UUID #{file}." if file.nil?
+
       xml = nil
       begin
         pkcs7 = OpenSSL::PKCS7.new(File.read(path))
@@ -41,7 +43,7 @@ module PProf
         xml = `security cms -D -i "#{path}" 2> /dev/null`
       end
       @plist = Plist.parse_xml(xml)
-      raise "Unable to parse file #{file}." if @plist.nil?
+      raise "Unable to parse file #{path}." if @plist.nil?
     end
 
     # The name of the Provisioning Profile
