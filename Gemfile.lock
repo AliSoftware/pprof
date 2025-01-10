@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pprof (0.5.1)
+    pprof (1.0.0)
       plist (~> 3.1)
 
 GEM
@@ -11,7 +11,7 @@ GEM
     parallel (1.21.0)
     parser (3.1.1.0)
       ast (~> 2.4.1)
-    plist (3.6.0)
+    plist (3.7.1)
     rainbow (3.1.1)
     regexp_parser (2.2.1)
     rexml (3.2.5)
