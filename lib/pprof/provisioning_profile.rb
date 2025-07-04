@@ -10,8 +10,8 @@ module PProf
   class ProvisioningProfile
     # The default location where all the Provisioning Profiles are stored on a Mac
     DEFAULT_DIRS = [
-      File.join(ENV['HOME'], 'Library', 'MobileDevice', 'Provisioning Profiles'),
-      File.join(ENV['HOME'], 'Library', 'Developer', 'Xcode', 'UserData', 'Provisioning Profiles')
+      File.join(Dir.home, 'Library', 'MobileDevice', 'Provisioning Profiles'),
+      File.join(Dir.home, 'Library', 'Developer', 'Xcode', 'UserData', 'Provisioning Profiles')
     ].freeze
 
     attr_reader :path

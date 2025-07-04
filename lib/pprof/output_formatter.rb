@@ -269,7 +269,7 @@ module PProf
       return false if actual.nil? # false if no Push entitlements
       return true if expected == true # true if Push present but we don't filter on specific env
 
-      actual =~ expected        # true if Push present and we filter on specific env
+      actual =~ expected # true if Push present and we filter on specific env
     end
   end
 end
