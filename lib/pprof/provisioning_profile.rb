@@ -9,28 +9,35 @@ module PProf
   # Represents the content of a Provisioning Profile file
   class ProvisioningProfile
     # The default location where all the Provisioning Profiles are stored on a Mac
-    DEFAULT_DIR = "#{ENV['HOME']}/Library/MobileDevice/Provisioning Profiles"
+    DEFAULT_DIRS = [
+      File.join(Dir.home, 'Library', 'MobileDevice', 'Provisioning Profiles'),
+      File.join(Dir.home, 'Library', 'Developer', 'Xcode', 'UserData', 'Provisioning Profiles')
+    ].freeze
+
+    attr_reader :path
 
     # Create a new ProvisioningProfile object from a file path or UUID
     #
     # - If the parameter given has the form of an UUID, a file named with this UUID
-    #   and a `.mobileprovision` is searched in the default directory `DEFAULT_DIR`
+    #   and a `.mobileprovision` is searched in the default directories `DEFAULT_DIRS`
     # - Otherwise, the parameter is interpreted as a file path
     #
     # @param [String] file
     #        File path or UUID of the ProvisioningProfile
     #
     def initialize(file)
-      path = if file.match?(/^[0-9A-F-]*$/i)
-               Dir["#{PProf::ProvisioningProfile::DEFAULT_DIR}/#{file}.{mobileprovision,provisionprofile}"].first
-             else
-               file
-             end
-      raise "Unable to find Provisioning Profile with UUID #{file}." if file.nil?
+      @path = if file.match?(/^[0-9A-F-]*$/i)
+                PProf::ProvisioningProfile::DEFAULT_DIRS.flat_map do |dir|
+                  Dir["#{dir}/#{file}.{mobileprovision,provisionprofile}"]
+                end.compact.first
+              else
+                file
+              end
+      raise "Unable to find Provisioning Profile with UUID #{file}." if @path.nil?
 
       xml = nil
       begin
-        pkcs7 = OpenSSL::PKCS7.new(File.read(path))
+        pkcs7 = OpenSSL::PKCS7.new(File.read(@path))
         pkcs7.verify([], OpenSSL::X509::Store.new)
         xml = pkcs7.data
         raise 'Empty PKCS7 payload' if xml.nil? || xml.empty?
@@ -40,10 +47,10 @@ module PProf
         # So as a fallback, we run the `security` command line.
         # (We could use `security` everytime, but invoking a command line is generally less
         #  efficient than calling the OpenSSL gem if available, so for now it's just used as fallback)
-        xml = `security cms -D -i "#{path}" 2> /dev/null`
+        xml = `security cms -D -i "#{@path}" 2> /dev/null`
       end
       @plist = Plist.parse_xml(xml)
-      raise "Unable to parse file #{path}." if @plist.nil?
+      raise "Unable to parse file #{@path}." if @plist.nil?
     end
 
     # The name of the Provisioning Profile
@@ -164,7 +171,7 @@ module PProf
     #
     # @return [String]
     def to_s
-      lines = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].map do |key|
+      lines = %i[path name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].map do |key|
         "- #{key}: #{send(key.to_sym)}"
       end +
               [

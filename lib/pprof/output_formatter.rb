@@ -7,7 +7,7 @@ module PProf
   # A helper tool to pretty-print Provisioning Profile informations
   class OutputFormatter
     # List of properties of a `PProf::ProvisioningProfile` to print when using the `-i` flag
-    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].freeze
+    MAIN_PROFILE_KEYS = %i[path name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].freeze
 
     # Initialize a new OutputFormatter
     #
@@ -110,6 +110,7 @@ module PProf
     #
     def as_json(profile, options = {})
       hash = profile.to_hash.dup
+      hash['path'] = profile.path
       hash.delete 'DER-Encoded-Profile'
       hash.delete 'ProvisionedDevices' unless options[:devices]
       if options[:certs]
@@ -164,15 +165,15 @@ module PProf
 
     # Prints the filtered list as a table
     #
-    # @param [String] dir
-    #        The directory containing the mobileprovision/provisionprofile files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
+    # @param [String] dirs
+    #        The directories containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to ['~/Library/MobileDevice/Provisioning Profiles', '~/Library/Developer/Xcode/UserData/Provisioning Profiles']
     #
     # @yield each provisioning provile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_table(dir: PProf::ProvisioningProfile::DEFAULT_DIR)
+    def print_table(dirs: PProf::ProvisioningProfile::DEFAULT_DIRS)
       count = 0
       errors = []
 
@@ -181,19 +182,21 @@ module PProf
       @output.puts table.row('UUID', 'Name', 'AppID', 'Expiration Date', ' ', 'Team Name')
       @output.puts table.separator
 
-      Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
-        file = File.join(dir, file_name)
-        begin
-          p = PProf::ProvisioningProfile.new(file)
+      dirs.each do |dir|
+        Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
+          file = File.join(dir, file_name)
+          begin
+            p = PProf::ProvisioningProfile.new(file)
 
-          next if block_given? && !yield(p)
+            next if block_given? && !yield(p)
 
-          state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
-          @output.puts table.row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
-        rescue StandardError => e
-          errors << { message: e, file: file }
+            state = DateTime.now < p.expiration_date ? "\u{2705}" : "\u{274c}" # 2705=checkmark, 274C=red X
+            @output.puts table.row(p.uuid, p.name, p.entitlements.app_id, p.expiration_date.to_time, state, p.team_name)
+          rescue StandardError => e
+            errors << { message: e, file: file }
+          end
+          count += 1
         end
-        count += 1
       end
 
       @output.puts table.separator
@@ -208,25 +211,27 @@ module PProf
     #        The options hash typically filled while parsing the command line arguments.
     #         - :mode: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :zero: will concatenate the entries with `\0` instead of `\n` if set
-    # @param [String] dir
-    #        The directory containing the mobileprovision/provisionprofile files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
+    # @param [String] dirs
+    #        The directories containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to ['~/Library/MobileDevice/Provisioning Profiles', '~/Library/Developer/Xcode/UserData/Provisioning Profiles']
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_list(options:, dir: PProf::ProvisioningProfile::DEFAULT_DIR)
+    def print_list(options:, dirs: PProf::ProvisioningProfile::DEFAULT_DIRS)
       errors = []
-      Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
-        file = File.join(dir, file_name)
-        p = PProf::ProvisioningProfile.new(file)
-        next if block_given? && !yield(p)
+      dirs.each do |dir|
+        Dir['*.{mobileprovision,provisionprofile}', base: dir].each do |file_name|
+          file = File.join(dir, file_name)
+          p = PProf::ProvisioningProfile.new(file)
+          next if block_given? && !yield(p)
 
-        @output.print options[:mode] == :list ? p.uuid.chomp : file.chomp
-        @output.print options[:zero] ? "\0" : "\n"
-      rescue StandardError => e
-        errors << { message: e, file: file }
+          @output.print options[:mode] == :list ? p.uuid.chomp : file.chomp
+          @output.print options[:zero] ? "\0" : "\n"
+        rescue StandardError => e
+          errors << { message: e, file: file }
+        end
       end
       errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?
     end
@@ -237,22 +242,24 @@ module PProf
     #        The options hash typically filled while parsing the command line arguments.
     #         - :certs: will print the UUIDs if set to `:list`, the file path otherwise
     #         - :devices: will concatenate the entries with `\0` instead of `\n` if set
-    # @param [String] dir
-    #        The directory containing the mobileprovision/provisionprofile files to list.
-    #        Defaults to '~/Library/MobileDevice/Provisioning Profiles'
+    # @param [String] dirs
+    #        The directories containing the mobileprovision/provisionprofile files to list.
+    #        Defaults to ['~/Library/MobileDevice/Provisioning Profiles', '~/Library/Developer/Xcode/UserData/Provisioning Profiles']
     #
     # @yield each provisioning profile for filtering/validation
     #        The block is given ProvisioningProfile object and should
     #        return true to display the row, false to filter it out
     #
-    def print_json_list(options:, dir: PProf::ProvisioningProfile::DEFAULT_DIR)
+    def print_json_list(options:, dirs: PProf::ProvisioningProfile::DEFAULT_DIRS)
       errors = []
-      profiles = Dir['*.{mobileprovision,provisionprofile}', base: dir].map do |file_name|
-        file = File.join(dir, file_name)
-        p = PProf::ProvisioningProfile.new(file)
-        as_json(p, options) unless block_given? && !yield(p)
-      rescue StandardError => e
-        errors << { message: e, file: file }
+      profiles = dirs.flat_map do |dir|
+        Dir['*.{mobileprovision,provisionprofile}', base: dir].map do |file_name|
+          file = File.join(dir, file_name)
+          p = PProf::ProvisioningProfile.new(file)
+          as_json(p, options) unless block_given? && !yield(p)
+        rescue StandardError => e
+          errors << { message: e, file: file }
+        end
       end.compact
       errors.each { |e| print_error(e[:message], e[:file]) } unless errors.empty?
       @output.puts JSON.pretty_generate(profiles)
@@ -262,7 +269,7 @@ module PProf
       return false if actual.nil? # false if no Push entitlements
       return true if expected == true # true if Push present but we don't filter on specific env
 
-      actual =~ expected        # true if Push present and we filter on specific env
+      actual =~ expected # true if Push present and we filter on specific env
     end
   end
 end
