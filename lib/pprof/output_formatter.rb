@@ -7,7 +7,7 @@ module PProf
   # A helper tool to pretty-print Provisioning Profile informations
   class OutputFormatter
     # List of properties of a `PProf::ProvisioningProfile` to print when using the `-i` flag
-    MAIN_PROFILE_KEYS = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].freeze
+    MAIN_PROFILE_KEYS = %i[path name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].freeze
 
     # Initialize a new OutputFormatter
     #
@@ -110,6 +110,7 @@ module PProf
     #
     def as_json(profile, options = {})
       hash = profile.to_hash.dup
+      hash['path'] = profile.path
       hash.delete 'DER-Encoded-Profile'
       hash.delete 'ProvisionedDevices' unless options[:devices]
       if options[:certs]

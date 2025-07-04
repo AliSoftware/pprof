@@ -171,7 +171,7 @@ module PProf
     #
     # @return [String]
     def to_s
-      lines = %i[name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].map do |key|
+      lines = %i[path name uuid app_id_name app_id_prefix creation_date expiration_date ttl team_ids team_name].map do |key|
         "- #{key}: #{send(key.to_sym)}"
       end +
               [
