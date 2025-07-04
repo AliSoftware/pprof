@@ -18,7 +18,7 @@ It also supports printing the output in JSON format so you can pipe the result o
 $ gem install pprof
 ```
 
-_(You might need to run this command with `sudo` if your gem home is a system directory)_
+_(You might need to run this command with `sudo` if your gem home is a system directory. Alternatively, we recommend to use a Ruby Version Manager like `rbenv`.)_
 
 ### Build from source
 
