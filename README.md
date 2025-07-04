@@ -129,11 +129,13 @@ File.open('certs.txt', 'w') do |file|
 end
 
 # And you can easily loop on all provisioning profiles and manipulate each
-dir = PProf::ProvisioningProfile::DEFAULT_DIR
+profiles_dirs = PProf::ProvisioningProfile::DEFAULT_DIRS
 # `*.mobileprovision` are typically for iOS profiles, `*.provisionprofile` for Mac profiles
-Dir["#{dir}/*.{mobileprovision,provisionprofile}"].each do |file|
-  p = PProf::ProvisioningProfile.new(file)
-  puts p.name
+profiles_dirs.each do |dir|
+  Dir["#{dir}/*.{mobileprovision,provisionprofile}"].each do |file|
+    p = PProf::ProvisioningProfile.new(file)
+    puts p.name
+  end
 end
 ```
 
@@ -149,7 +151,7 @@ That plist payload itself contains various data, including some textual informat
 
 ```ruby
 PProf::ProvisioningProfile
-    ::DEFAULT_DIR
+    ::DEFAULT_DIRS
     new(file) => PProf::ProvisioningProfile
     to_hash => Hash<String, Any>
     
